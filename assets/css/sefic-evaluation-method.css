@@ -1,0 +1,86 @@
+.sefic-evaluation-configuration .btn {
+    margin-left:10px;
+}
+
+.sefic-evaluation-configuration input {
+    border:1px solid transparent;
+    cursor: pointer;
+}
+
+.sefic-evaluation-configuration input:focus {
+    border:1px solid #888;
+    cursor: text;
+}
+
+.sefic-evaluation-configuration input.section-name{
+    font-size: 1.3em;
+    font-weight: bold;
+    width: 80%;
+}
+
+.sefic-evaluation-configuration table {
+    width:100%;
+}
+.sefic-evaluation-configuration table th .btn {
+    text-align: right
+}
+
+.sefic-evaluation-configuration table input {
+    width: 100%;
+}
+
+.sefic-evaluation-configuration .criterion-title {
+    width: 60%;
+}
+
+.sefic-evaluation-configuration .criterion-num {
+    width: 10%;
+}
+
+.sefic-evaluation-configuration .criterion-num input{
+    font-weight: bold;
+    text-align: center;
+    font-size: 13px;
+}
+
+/* evaluation form */
+
+.sefic-evaluation-form table{
+    width:100%;
+    border:1px solid #bbb;
+    padding:5px;
+}
+
+.sefic-evaluation-form table th{
+    background-color: #ddd;
+}
+
+.sefic-evaluation-form table td{
+    padding:0 10px;
+    text-align: left;
+}
+
+.sefic-evaluation-form table tr td:last-of-type{
+    vertical-align: bottom;
+    text-align: right;
+    padding:0;
+}
+
+.sefic-evaluation-form table td input{
+    width:50px;
+}
+
+
+.sefic-evaluation-form table tr.subtotal {
+    background-color: #ddd;
+}
+
+.sefic-evaluation-form table tr.subtotal td{
+    padding: 5px 10px;
+    font-weight: bold;
+}
+
+.sefic-evaluation-form textarea {
+    width: 100%;
+    height:150px;
+}
