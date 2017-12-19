@@ -3,7 +3,7 @@
     <div ng-repeat="tipologia in tipologiaAtuacao">
         <a class="required editable" ng-click="editBox.open('eb-tipologia'+$index, $event)"> {{tipologia.segmento ? tipologia.segmento : 'Escolha um segmento'}}</a>
 
-        <edit-box  id="eb-tipologia{{$index}}"position="bottom" cancel-label="Cancelar" submit-label="Enviar" on-submit="setTypes">
+        <edit-box  id="eb-tipologia{{$index}}" position="bottom" cancel-label="Cancelar" submit-label="Enviar" on-submit="setTypes" on-cancel="resetValues" close-on-cancel="1">
             <label>
                 área:
                 <select ng-model="tipologia.area" ng-change="set($index)">

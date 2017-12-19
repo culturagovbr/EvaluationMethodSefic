@@ -33,6 +33,7 @@
 
         $scope.set = function(index){
             $scope.tipologiaAtuacao[index]._segmentos = $scope.tipologias[$scope.tipologiaAtuacao[index].area];
+
             $scope.data._tipo2 = '';
         };
 
@@ -40,9 +41,13 @@
         $scope.setTypes = function(){
             var $box = jQuery('[id^=eb-tipologia]').find('>div.edit-box');
             $box.hide();
-
             jQuery('[id^=eb-tipologia]').trigger('close');
         };
-        
+
+        $scope.resetValues = function(){
+
+        };
+
+
     }]);
 })(angular);
