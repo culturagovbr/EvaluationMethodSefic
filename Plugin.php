@@ -69,6 +69,7 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
         $app->view->enqueueStyle('app', 'sefic-evaluation-method', 'css/sefic-evaluation-method.css');
         $app->view->enqueueScript('app', 'sefic-evaluation-form', 'js/ng.evaluationMethod.sefic.js', ['entity.module.opportunity']);
         $app->view->enqueueScript('app', 'opportunity-controller-categories', 'js/ng.opportunity.controller.categories.js', ['entity.module.opportunity']);
+        $app->view->enqueueScript('app', 'registration-controller', 'js/ng.registration.controller.js', ['entity.module.opportunity']);
 
         $app->view->localizeScript('seficEvaluationMethod', [
             'sectionNameAlreadyExists' => i::__('Já existe uma seção com o mesmo nome'),
@@ -78,6 +79,7 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
         ]);
         $app->view->jsObject['angularAppDependencies'][] = 'ng.evaluationMethod.sefic';
         $app->view->jsObject['angularAppDependencies'][] = 'opportunity.controller.categories';
+        $app->view->jsObject['angularAppDependencies'][] = 'registration.controller';
         $app->view->jsObject['segmentos'] = require __DIR__ . '/' . 'tipologia-oportunidades.php';
     }
 

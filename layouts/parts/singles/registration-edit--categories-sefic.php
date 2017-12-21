@@ -1,7 +1,7 @@
 <div class="registration-fieldset" ng-controller="CategoriesController">
     <h4>Tipologia de categoria</h4>
     <div ng-repeat="tipologia in tipologiaAtuacao">
-        <a class="required editable" ng-click="editBox.open('eb-tipologia'+$index, $event)"> {{tipologia.segmento ? tipologia.segmento : 'Escolha um segmento'}}</a>
+        <a class="required editable js-editable" id="category" ng-click="editBox.open('eb-tipologia'+$index, $event)"> {{tipologia.segmento ? tipologia.segmento : 'Escolha um segmento'}}</a>
 
         <edit-box  id="eb-tipologia{{$index}}" position="bottom" cancel-label="Cancelar" submit-label="Enviar" on-submit="setTypes" on-cancel="resetValues" close-on-cancel="1">
             <label>
@@ -20,6 +20,6 @@
         </edit-box>
 
     </div>
-    <a class="btn btn-danger delete" ng-click="removerSegmento()">Remover</a>
     <a class="btn btn-default add" ng-click="adicionarSegmento()">Novo Segmento</a>
+    <a ng-if="tipologiaAtuacao.length > 1" class="btn btn-danger delete" ng-show="tipologiaAtuacao" ng-click="removerSegmento()">Remover</a>
 </div>
