@@ -8,17 +8,29 @@
         $scope.tipologias = MapasCulturais.segmentos;
         $scope.tipologiaAtuacao = [
             {
-                id: 0,
                 _areas: $scope.tipologias,
-                _segmentos: []
+                _segmentos: [],
             }
         ];
 
+        if(MapasCulturais.entity.object.category){
+            $scope.tipologiaAtuacao = [];
+
+            angular.forEach(MapasCulturais.entity.object.category.split(";"), (category)=> {
+                $scope.tipologiaAtuacao.push(
+                    {
+                        _areas: $scope.tipologias,
+                        _segmentos: [],
+                        segmento: category
+                    }
+                );
+            });
+        }
+
         $scope.adicionarSegmento = function() {
-            var novoSegmento = $scope.tipologiaAtuacao.length+1;
             $scope.tipologiaAtuacao.push(
                 {
-                    'id': novoSegmento,
+                    // 'id': novoSegmento,
                     _areas: $scope.tipologias,
                     _segmentos: []
                 }
@@ -30,11 +42,9 @@
             $scope.tipologiaAtuacao.splice(ultimoSegmento);
         };
 
-
         $scope.set = function(index){
             $scope.tipologiaAtuacao[index]._segmentos = $scope.tipologias[$scope.tipologiaAtuacao[index].area];
         };
-
         
         $scope.setTypes = function(){
 

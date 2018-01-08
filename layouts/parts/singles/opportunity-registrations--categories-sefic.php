@@ -5,7 +5,7 @@ $editable_class = $can_edit ? 'js-editable' : '';
 
 ?>
 <div id="registration-categories" class="registration-fieldset" ng-controller="CategoriesController">
-    <h4>Tipologia de atuação</h4>
+    <h4>Áreas de atuação e segmentos</h4>
     <p class="registration-help" >É possível selecionar multiplas áreas e segmentos.</p>
     <div ng-repeat="(k,s) in tipologias">
         <p>

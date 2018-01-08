@@ -15,7 +15,7 @@ $this->addOpportunitySelectFieldsToJs($entity->opportunity);
 $this->addRegistrationToJs($entity);
 
 $this->includeAngularEntityAssets($entity);
-
+$this->includeEditableEntityAssets();
 
 $_params = [
     'entity' => $entity,
@@ -29,40 +29,26 @@ $slug = $_params['opportunity']->evaluationMethodConfiguration->getEvaluationMet
 <?php $this->part('editable-entity', array('entity'=>$entity, 'action'=>$action));  ?>
 
 <article class="main-content registration" ng-controller="OpportunityController">
-
     <?php $this->part('singles/registration--header', $_params); ?>
-    
+
     <article>
         <?php $this->applyTemplateHook('form','begin'); ?>
-        
-        <?php $this->part('singles/registration-edit--header', $_params) ?>
 
-        <?php if($slug == "sefic"):?>
-            <?php $this->part('singles/registration-edit--categories-sefic', $_params) ?>
-        <?php else:?>
-            <?php $this->part('singles/registration-edit--categories', $_params) ?>
-        <?php endif;?>
-        
-        <?php $this->part('singles/registration-edit--agents', $_params) ?>
-        
-        <?php // Desabilitando este template por enquanto, pois não é a melhor forma de apresentar para o usuário que está se inscrevendo ?>
-        <?php //$this->part('singles/registration-edit--seals', $_params) ?>
-        
-        <?php $this->part('singles/registration-edit--fields', $_params) ?>
+        <?php $this->part('singles/registration-single--header', $_params) ?>
 
-        <?php if(!$entity->preview): ?>
+        <?php if($slug === "sefic"){
+            $this->part('singles/registration-single--categories-sefic', $_params);
+        }else{
+            $this->part('singles/registration-single--categories', $_params);
+        }
+        ?>
 
-            <?php if($slug == "sefic"):?>
-                <?php $this->part('singles/registration-edit--send-button-sefic', $_params) ?>
-            <?php else:?>
-                <?php $this->part('singles/registration-edit--send-button', $_params) ?>
-            <?php endif;?>
-
-        <?php endif; ?>
+        <?php $this->part('singles/registration-single--agents', $_params) ?>
+        
+        <?php $this->part('singles/registration-single--fields', $_params) ?>
 
         <?php $this->applyTemplateHook('form','end'); ?>
     </article>
-
 </article>
 <?php $this->part('singles/registration--sidebar--left', $_params) ?>
 <?php $this->part('singles/registration--sidebar--right', $_params) ?>
