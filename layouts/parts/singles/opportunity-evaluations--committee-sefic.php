@@ -45,29 +45,38 @@ $method = $entity->getEvaluationMethod();
         margin-right: 10px;
     }
 
+    .category-editable {
+        display: inline-block;
+        padding: 0 3px;
+        border-radius: 2px;
+        vertical-align: top;
+    }
+
+    .category-editable::after {
+        margin-left: 5px;
+        content: "l";
+        font-size: 1rem;
+        line-height: 1rem;
+        font-family: "ElegantIcons";
+        font-weight: normal;
+        font-style: normal;
+        vertical-align: initial;
+        text-transform: none;
+        color: #666;
+    }
+
 </style>
-<div class="agentes-relacionados">
+<div class="agentes-relacionados" ng-controller="SeficEvaluationCommitteeController">
     <div class="registration-fieldset">
         <h4><?php i::_e('Comissão de Avaliação'); ?></h4>
-        <?php if($method->fetchRegistrations()): ?>
-            <div id='status-info' class="alert info">
-                <p>
-                    <?php \MapasCulturais\i::_e("Se você quiser <strong>dividir as inscrições</strong> entre os avaliadores você pode utilizar os <strong>campos de distribuição</strong> para cada avaliador. Você pode dividir as inscrições pelo final dos números das inscrições e/ou pela categoria definida nas inscrições."); ?>
-                </p>
-                <p>
-                    <?php \MapasCulturais\i::_e("No <strong>primeiro</strong> campo da distribuição informe o <strong>final do número de inscrição</strong>, de acordo com os exemplos abaixo.") ?>
-                    <ul>
-                        <li><?php \MapasCulturais\i::_e("<strong>00-09</strong> - para as inscrições com final entre 0 e 9</li>");?></li>
-                        <li><?php \MapasCulturais\i::_e("<strong>10-60</strong> - para as inscrições com final entre 10 e 60</li>");?></li>
-                        <li><?php \MapasCulturais\i::_e("<strong>61-99</strong> - para as inscrições com final entre 61 e 99</li>");?></li>
-                    </ul>
-                </p>
-                <p>
-                    <?php \MapasCulturais\i::_e("No <strong>segundo</strong> campo da distribuição informe a(s) <strong>categoria(s) de inscrição</strong>.")?>
-                </p>
-                <div class="close"></div>
-            </div>
-        <?php endif; ?>
+<!--        --><?php //if($method->fetchRegistrations()): ?>
+<!--            <div id='status-info' class="alert info">-->
+<!--                <p>-->
+<!--                    --><?php //\MapasCulturais\i::_e("Explicação da divisão por segmento")?>
+<!--                </p>-->
+<!--                <div class="close"></div>-->
+<!--            </div>-->
+<!--        --><?php //endif; ?>
             <div class="committee" ng-repeat="admin in data.committee">
                 <div ng-if="admin.status === -5" class="alert warning"><?php i::_e('Aguardando confirmação do avaliador')?></div>
                 <div class="committee--info ">
@@ -81,8 +90,35 @@ $method = $entity->getEvaluationMethod();
                 <?php if($method->fetchRegistrations()): ?>
                     <div class="committee--fetch clear">
                         <label class="hltip" title="<?php i::esc_attr_e('Distribuição das inscrições: use para dividir as inscrições entre os avaliadores'); ?>"> <?php i::_e('Distribuição'); ?> </label><br>
-                        <input ng-model="config['fetch'][admin.agentUserId]" ng-model-options="{ debounce: 1000, updateOn: 'blur'}" placeholder="<?php i::_e('0-9') ?>"/>
-                        <input ng-model="config['fetchCategories'][admin.agentUserId]" ng-model-options="{ debounce: 1000, updateOn: 'blur'}"  placeholder="<?php i::_e('Categorias separadas por ponto e vírgula') ?>"/>
+<!--                        <input ng-model="config['fetch'][admin.agentUserId]" ng-model-options="{ debounce: 1000, updateOn: 'blur'}" placeholder="--><?php //i::_e('0-9') ?><!--"/>-->
+                        <input type="hidden" id="categoria{{$index}}" ng-model="config['fetchCategories'][admin.agentUserId]"  placeholder="<?php i::_e('Categorias separadas por ponto e vírgula') ?>"/>
+
+                            <div data-ng-init="init($index)" ng-controller="SegmentosController">
+
+                                <div ng-repeat="tipologia in tipologiaAtuacao">
+                                    <a class="category-editable" id="category" ng-click="editBox.open('eb-tipologia-'+$parent.$index+'-'+$index, $event);"> {{tipologia.segmento ? tipologia.segmento : 'Escolha um segmento'}}</a>
+
+                                    <edit-box id="eb-tipologia-{{$parent.$index}}-{{$index}}" index="{{$parent.$index}}" position="bottom" cancel-label="Cancelar" submit-label="Enviar" on-submit="setTypes" on-cancel="setTypes" close-on-cancel="1">
+                                        <label>
+                                            área:
+                                            <select ng-model="tipologia.area" ng-change="set($index)">
+                                                <option ng-repeat="(key, val) in tipologia._areas" ng-value="key">{{key}}</option>
+                                            </select>
+                                        </label>
+                                        <label ng-show="tipologia.area">
+                                            segmento:
+                                            <select ng-model="tipologia.segmento">
+                                                <option ng-repeat="val in tipologia._segmentos" ng-value="val">{{val}}</option>
+                                            </select>
+                                        </label>
+
+                                    </edit-box>
+
+                                </div>
+                                <a class="btn btn-default add" ng-click="adicionarSegmento()" >Adicionar Segmento</a>
+
+                                <a ng-if="tipologiaAtuacao.length > 1" class="btn btn-danger delete" ng-show="tipologiaAtuacao" ng-click="removerSegmento($index)">Remover</a>
+                            </div>
                     </div>
                 <?php endif; ?>
             </div>

@@ -70,14 +70,18 @@ $slug = $entity->evaluationMethodConfiguration->getEvaluationMethod()->getSlug()
     <div class="tabs-content">
         <?php $this->applyTemplateHook('tabs-content','begin'); ?>
 
-        <?php $this->part('singles/opportunity-about', ['entity' => $entity]) ?>
+        <?php if($slug === 'sefic'){
+            $this->part('singles/opportunity-about-sefic', ['entity' => $entity]);
+        }else{
+            $this->part('singles/opportunity-about', ['entity' => $entity]);
+        }?>
 
         <?php if($this->isEditable()): ?>
             <?php $this->part('singles/opportunity-registrations--config', ['entity' => $entity]) ?>
             <?php if(!$entity->isNew()): ?>
                 <?php if($slug === 'sefic'){
                     $this->part('singles/opportunity-evaluations--config-sefic', ['entity' => $entity]);
-                }else {
+                }else{
                     $this->part('singles/opportunity-evaluations--config', ['entity' => $entity]);
                 } ?>
             <?php endif; ?>

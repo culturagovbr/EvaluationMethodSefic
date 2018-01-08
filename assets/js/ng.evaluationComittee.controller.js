@@ -14,44 +14,32 @@
     module.controller('SegmentosController',['$scope', 'EditBox', function($scope, EditBox){
         $scope.editBox = EditBox;
         $scope.tipologias = MapasCulturais.segmentos;
-        $scope.tipologiaAtuacao = [
-            {
-                _areas: $scope.tipologias,
-                _segmentos: []
-            }
-        ];
-        // $scope.tipologiaAtuacao.fill(0, $scope.$parent.data.committee.length, {
-        //     _areas: $scope.tipologias,
-        //     _segmentos: []
-        // });
+        
+        $scope.init = function(index){
+            var userId = $scope.data.committee[index].agentUserId;
+            var categories = $scope.config.fetchCategories[userId].split(";");
 
-        $scope.init = function(){
+            $scope.tipologiaAtuacao =
+                [
+                    {
+                        _areas: $scope.tipologias,
+                        _segmentos: [],
+                    }
+                ];
 
-        /*    angular.forEach($scope.tipologiaAtuacao, (k,v) => {
-                var index = Object.keys(MapasCulturais.entity.object.evaluationMethodConfiguration.fetchCategories).findIndex((e) => {
-                    // console.log($scope.$parent.data.committee[k]);
-                    console.log($scope.$parent.data.committee);
-
-                    // return e === $scope.$parent.data.committee[k].agentUserId;
-                });
-                // var index = MapasCulturais.entity.object.evaluationMethodConfiguration.fetchCategories.findIndex((e,i) => {
-                //     return $scope.$parent.data.committee[k].agentUserId === i;
-                // });
-                // var i = $scope.$parent.data.committee.findIndex((e)=>{return e.agentUserId === k});
-
-                // $scope.tipologiaAtuacao.push(
-                //     {
-                //
-                //     }
-                // )
+            angular.forEach(categories, (category, i) => {
+                $scope.tipologiaAtuacao[i] =
+                    {
+                        _areas: $scope.tipologias,
+                        _segmentos: [],
+                        segmento: category
+                    };
             });
-            */
         };
 
         $scope.adicionarSegmento = function() {
             $scope.tipologiaAtuacao.push(
                 {
-                    // 'id': novoSegmento,
                     _areas: $scope.tipologias,
                     _segmentos: []
                 }
@@ -59,12 +47,18 @@
 
         };
 
-        $scope.removerSegmento = function() {
+        $scope.removerSegmento = function(index) {
+            var inputValues = [];
             var ultimoSegmento = $scope.tipologiaAtuacao.length-1;
             $scope.tipologiaAtuacao.splice(ultimoSegmento);
 
-        };
+            angular.forEach($scope.tipologiaAtuacao, function(val){
+                inputValues.push(val.segmento);
+            });
 
+            jQuery('#categoria'+index).val(inputValues.join(';'));
+            jQuery('#categoria'+index).trigger("change");
+        };
 
         $scope.set = function(index){
             $scope.tipologiaAtuacao[index]._segmentos = $scope.tipologias[$scope.tipologiaAtuacao[index].area];

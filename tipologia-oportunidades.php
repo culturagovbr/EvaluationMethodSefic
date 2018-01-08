@@ -58,7 +58,7 @@ return array(
     "Patrimônio Cultural Material e Imaterial" => array(
         "Doações ou aquisições de acervos culturais em geral para arquivos públicos e instituições culturais",
         "Preservação, restauração, conservação, salvaguarda, identificação, registro, educação patrimonial e acervos do patrimônio cultural material e imaterial",
-        "Ações de documentação ou digitalização de acervo bibliográfico e arquivístico; pesquisa; sistematização de informação",
+        "Ações de documentação ou digitalização de acervo bibliográfico e arquivístico, pesquisa, sistematização de informação",
         "Preservação, restauração, manutenção, readequação ou revitalização de equipamentos culturais ou edificações destinadas a preservação de patrimônio cultural",
         "Ações de segurança para preservação de patrimônio cultural ou de acervos",
         "Ações educativo-culturais, inclusive seminários, oficinas e palestras, visando a preservação do patrimônio material, imaterial ou de acervos de valor cultural",
@@ -72,11 +72,11 @@ return array(
     "Museus e Memória" => array(
         "Doação ou aquisição de acervos para museus e instituições de preservação da memória",
         "Preservação, restauração, conservação, identificação, registro e promoção",
-        "Documentação e digitalização de acervos; sistemas de informações",
+        "Documentação e digitalização de acervos, sistemas de informações",
         "Ações de segurança para preservação de acervos",
         "Planos anuais de atividades e elaboração de planos museológicos",
         "Exposições realizadas em museus, exposições organizadas com acervos de museus e museografia",
-        "Pesquisa; sistematização de informações",
+        "Pesquisa, sistematização de informações",
         "Ação educativo-cultural, inclusive seminários, congressos, palestras",
         "Criação e implantação (projetos, construção, restauração e reforma)",
         "Ações de capacitação e treinamento de pessoal",
