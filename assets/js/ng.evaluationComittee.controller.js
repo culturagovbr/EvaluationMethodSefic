@@ -17,7 +17,7 @@
         
         $scope.init = function(index){
             var userId = $scope.data.committee[index].agentUserId;
-            var categories = $scope.config.fetchCategories[userId].split(";");
+            var categories = $scope.config.fetchCategories[userId] ? $scope.config.fetchCategories[userId].split(";") : [];
 
             $scope.tipologiaAtuacao =
                 [
@@ -72,7 +72,6 @@
             var $box = jQuery('[id^=eb-tipologia]').find('>div.edit-box');
             $box.hide();
             jQuery('[id^=eb-tipologia]').trigger('close');
-            console.log($scope.tipologiaAtuacao);
         };
 
 
@@ -120,7 +119,6 @@
 
         committeeApi.find().success(function(result){
             $scope.data.committee = result;
-            // console.log($scope);
         });
 
         $scope.fetch = emconfig.fetch || {};
