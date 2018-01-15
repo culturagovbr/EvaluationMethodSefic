@@ -14,10 +14,15 @@
     module.controller('SegmentosController',['$scope', 'EditBox', function($scope, EditBox){
         $scope.editBox = EditBox;
         $scope.tipologias = MapasCulturais.segmentos;
-        
+
         $scope.init = function(index){
             var userId = $scope.data.committee[index].agentUserId;
-            var categories = $scope.config.fetchCategories[userId] ? $scope.config.fetchCategories[userId].split(";") : [];
+
+            if($scope.config.fetchCategories === null){
+                var categories = [];
+            }else{
+                var categories = $scope.config.fetchCategories[userId] ? $scope.config.fetchCategories[userId].split(";") : [];
+            }
 
             $scope.tipologiaAtuacao =
                 [
@@ -84,7 +89,6 @@
 
             jQuery('#categoria'+index).val(inputValues.join(';'));
             jQuery('#categoria'+index).trigger("change");
-
         };
 
     }]);
