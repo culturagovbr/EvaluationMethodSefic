@@ -61,8 +61,7 @@
                 inputValues.push(val.segmento);
             });
 
-            jQuery('#categoria'+index).val(inputValues.join(';'));
-            jQuery('#categoria'+index).trigger("change");
+            $scope.config['fetchCategories'][$scope.admin.agentUserId] = inputValues.join(';');
         };
 
         $scope.set = function(index){
@@ -87,8 +86,7 @@
                 inputValues.push(val.segmento);
             });
 
-            jQuery('#categoria'+index).val(inputValues.join(';'));
-            jQuery('#categoria'+index).trigger("change");
+            $scope.config['fetchCategories'][$scope.admin.agentUserId] = inputValues.join(';');
         };
 
     }]);
@@ -129,8 +127,8 @@
         $scope.fetchCategories = emconfig.fetchCategories || {};
 
         $scope.config = {
-            fetch: emconfig.fetch,
-            fetchCategories: emconfig.fetchCategories,
+            fetch: emconfig.fetch || {},
+            fetchCategories: emconfig.fetchCategories || {},
             infos: emconfig.infos
         };
 
