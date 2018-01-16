@@ -23,33 +23,19 @@ use MapasCulturais\i;
     <div class="close"></div>
 </div>
 
-<p>
-    <strong> <?php i::_e("Colunas Habilitadas:") ?> </strong><br>
-    <label><input type="checkbox" ng-model="data.registrationTableColumns.number" /> <?php i::_e('Inscrição') ?> </label>
-    <label><input type="checkbox" ng-model="data.registrationTableColumns.category" /> <?php i::_e('Categorias') ?> </label>
-    <label><input type="checkbox" ng-model="data.registrationTableColumns.agents" /> <?php i::_e('Agentes') ?> </label>
-    <label><input type="checkbox" ng-model="data.registrationTableColumns.attachments" /> <?php i::_e('Anexos') ?> </label>
-    <label><input type="checkbox" ng-model="data.registrationTableColumns.evaluation" /> <?php i::_e('Avaliação') ?> </label>
-    <label><input type="checkbox" ng-model="data.registrationTableColumns.status" /> <?php i::_e('Status') ?> </label>
-
-    <label ng-repeat="field in data.opportunitySelectFields" ng-if="field.required">
-        <input type="checkbox" ng-model="data.registrationTableColumns[field.fieldName]" />{{field.title}}
-    </label>
-</p>
-
 <style>
     table.fullscreen {
         background-color: white;
     }
 </style>
 <div id="registrations-table-container">
-<table id="registrations-table" class="js-registration-list registrations-table" ng-class="{'no-options': data.entity.registrationCategories.length === 0, 'no-attachments': data.entity.registrationFileConfigurations.length === 0, 'registrations-results': data.entity.published, 'fullscreen': data.fullscreenTable}"><!-- adicionar a classe registrations-results quando resultados publicados-->
+<table id="registrations-table" ng-controller="RegistrationNumberController" class="js-registration-list registrations-table" ng-class="{'registrations-results': data.entity.published, 'fullscreen': data.fullscreenTable}"><!-- adicionar a classe registrations-results quando resultados publicados-->
     <thead>
         <tr>
             <th ng-show="data.registrationTableColumns.number" class="registration-id-col">
                 <?php i::_e("Inscrição");?>
             </th>
-            <th ng-show="data.registrationTableColumns.category" ng-if="data.entity.registrationCategories" class="registration-option-col" title="{{data.registrationCategory}}">
+            <th ng-show="data.registrationTableColumns.category" class="registration-option-col" title="{{data.registrationCategory}}">
                 <mc-select class="left transparent-placeholder" placeholder="status" model="registrationsFilters['category']" data="data.registrationCategoriesToFilter" title="{{data.registrationCategory}}"></mc-select>
             </th>
             <th ng-repeat="field in data.opportunitySelectFields" ng-show="data.registrationTableColumns[field.fieldName]" class="registration-option-col">
@@ -88,7 +74,7 @@ use MapasCulturais\i;
     <tbody>
         <tr ng-repeat="reg in data.registrations | orderBy: ['-evaluationResultString', '-category'] " id="registration-{{reg.id}}" class="{{getStatusSlug(reg.status)}}" >
             <td ng-show="data.registrationTableColumns.number" class="registration-id-col"><a href="{{reg.singleUrl}}">{{reg.number}}</a></td>
-            <td ng-show="data.registrationTableColumns.category" ng-if="data.entity.registrationCategories" class="registration-option-col">{{reg.category}}</td>
+            <td ng-show="data.registrationTableColumns.category" class="registration-option-col" >{{(reg.category | limitTo: 50) + (reg.category.length > 50 ? '...' : '')}}</td>
             <td ng-repeat="field in data.opportunitySelectFields" ng-if="data.registrationTableColumns[field.fieldName]" class="registration-option-col">
                 {{reg[field.fieldName]}}
             </td>

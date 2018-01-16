@@ -82,13 +82,15 @@ $slug = $entity->evaluationMethodConfiguration->getEvaluationMethod()->getSlug()
         <?php else : ?>
             <?php if($slug == 'sefic'){
                 $this->part('singles/opportunity-registrations--tables-sefic', ['entity' => $entity]);
+
+                if($entity->canUser('viewEvaluations') || $entity->canUser('@control'))
+                    $this->part('singles/opportunity-evaluations-sefic', ['entity' => $entity]);
             }else{
                 $this->part('singles/opportunity-registrations--tables', ['entity' => $entity]);
+
+                if($entity->canUser('viewEvaluations') || $entity->canUser('@control'))
+                    $this->part('singles/opportunity-evaluations', ['entity' => $entity]);
             } ?>
-        
-            <?php if($entity->canUser('viewEvaluations') || $entity->canUser('@control')): ?>
-                <?php $this->part('singles/opportunity-evaluations', ['entity' => $entity]) ?>
-            <?php endif; ?>
         <?php endif; ?>
 
         <?php $this->applyTemplateHook('tabs-content','end'); ?>
