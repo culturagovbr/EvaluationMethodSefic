@@ -177,6 +177,63 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
 
             $sections = $result;
         });
+
+        $app->hook('GET(opportunity.importLastPhaseRegistrations)', function() use($app) {
+            $module = new \OpportunityPhases\Module;
+
+            $target_opportunity = $module->getRequestedOpportunity();
+
+            $target_opportunity ->checkPermission('@control');
+
+            if($target_opportunity->previousPhaseRegistrationsImported){
+                $this->errorJson(\MapasCulturais\i::__('As inscrições já foram importadas para esta fase'), 400);
+            }
+
+            $previous_phase = $module->getPreviousPhase($target_opportunity);
+
+            $registrations = array_filter($previous_phase->getSentRegistrations(), function($item){
+                if($item->status === Entities\Registration::STATUS_APPROVED || $item->status === Entities\Registration::STATUS_WAITLIST){
+                    return $item;
+                }
+            });
+
+            if(count($registrations) < 1){
+                $this->errorJson(\MapasCulturais\i::__('Não há inscrições aprovadas fase anterior'), 400);
+            }
+
+            $new_registrations = [];
+
+            $app->disableAccessControl();
+            foreach ($registrations as $r){
+                foreach(explode(";", $r->category) as $c){
+                    $reg = new Entities\Registration;
+                    $reg->owner = $r->owner;
+                    $reg->opportunity = $target_opportunity;
+                    $reg->status = Entities\Registration::STATUS_DRAFT;
+
+                    $reg->previousPhaseRegistrationId = $r->id;
+                    $reg->category = $c;
+                    $reg->save(true);
+
+                    if(isset($this->data['sent'])){
+                        $reg->send();
+                    }
+
+                    $r->nextPhaseRegistrationId = $reg->id;
+                    $r->save(true);
+
+                    $new_registrations[] = $reg;
+                }
+            }
+
+            $target_opportunity->previousPhaseRegistrationsImported = true;
+
+            $target_opportunity->save(true);
+
+            $app->enableAccessControl();
+
+            $this->finish($new_registrations);
+        });
     }
 
     public function _getConsolidatedResult(\MapasCulturais\Entities\Registration $registration) {
