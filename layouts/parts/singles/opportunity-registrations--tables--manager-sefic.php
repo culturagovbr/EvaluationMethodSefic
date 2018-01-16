@@ -43,6 +43,7 @@ use MapasCulturais\i;
     }
 </style>
 <div id="registrations-table-container">
+asdfghjklçwertyuiol
 <table id="registrations-table" class="js-registration-list registrations-table" ng-class="{'no-options': data.entity.registrationCategories.length === 0, 'no-attachments': data.entity.registrationFileConfigurations.length === 0, 'registrations-results': data.entity.published, 'fullscreen': data.fullscreenTable}"><!-- adicionar a classe registrations-results quando resultados publicados-->
     <thead>
         <tr>
@@ -86,7 +87,7 @@ use MapasCulturais\i;
         </td>
     </tr>
     <tbody>
-        <tr ng-repeat="reg in data.registrations | orderBy: ['-category', '-evaluationResultString'] " id="registration-{{reg.id}}" class="{{getStatusSlug(reg.status)}}" >
+        <tr ng-repeat="reg in data.registrations | orderBy: ['-evaluationResultString', '-category'] " id="registration-{{reg.id}}" class="{{getStatusSlug(reg.status)}}" >
             <td ng-show="data.registrationTableColumns.number" class="registration-id-col"><a href="{{reg.singleUrl}}">{{reg.number}}</a></td>
             <td ng-show="data.registrationTableColumns.category" ng-if="data.entity.registrationCategories" class="registration-option-col">{{reg.category}}</td>
             <td ng-repeat="field in data.opportunitySelectFields" ng-if="data.registrationTableColumns[field.fieldName]" class="registration-option-col">
