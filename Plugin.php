@@ -180,7 +180,20 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
             $sections = $result;
         });
 
+        $app->hook('view.partial(singles/opportunity-registrations--tables--manager-sefic):before', function(){
+            if($this->controller->action === 'create'){
+                return;
+            }
+
+            $opportunity = $this->controller->requestedEntity;
+            if($opportunity->isOpportunityPhase){
+                $this->part('import-last-phase-button', ['entity' => $opportunity]);
+            }
+        });
+
+
         $app->hook('GET(opportunity.importLastPhaseRegistrations)', function() use($app) {
+
             $module = new \OpportunityPhases\Module;
 
             $target_opportunity = $module->getRequestedOpportunity();
