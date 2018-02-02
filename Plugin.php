@@ -64,6 +64,43 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
 
     }
 
+    function getValidationErrors(Entities\EvaluationMethodConfiguration $evaluation_method_configuration, array $data){
+        $errors = [];
+
+        $empty = false;
+
+
+        foreach($data as $key => $val){
+            if($key === 'obs' && !trim($val)){
+                $empty = true;
+            } else if($key !== 'obs' && !is_numeric($val)){
+                $empty = true;
+            }
+        }
+
+        if($empty){
+            $errors[] = i::__('Todos os campos devem ser preenchidos');
+        }
+
+        if(!$errors){
+            foreach($evaluation_method_configuration->criteria as $c){
+                if(isset($data[$c->id])){
+                    $val = (float) $data[$c->id];
+                    if($val > (float) $c->max){
+                        $errors[] = sprintf(i::__('O valor do campo "%s" é maior que o valor máximo permitido'), $c->title);
+                        break;
+                    } else if($val < (float) $c->min) {
+                        $errors[] = sprintf(i::__('O valor do campo "%s" é menor que o valor mínimo permitido'), $c->title);
+                        break;
+                    }
+                }
+            }
+        }
+
+
+        return $errors;
+    }
+
     function enqueueScriptsAndStyles() {
         $app = App::i();
         $app->view->enqueueStyle('app', 'sefic-evaluation-method', 'css/sefic-evaluation-method.css');
@@ -189,6 +226,7 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
             if($opportunity->isOpportunityPhase){
                 $this->part('import-last-phase-button', ['entity' => $opportunity]);
             }
+
         });
 
 
