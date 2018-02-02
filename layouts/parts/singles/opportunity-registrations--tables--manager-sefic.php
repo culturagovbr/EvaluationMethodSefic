@@ -28,6 +28,11 @@ use MapasCulturais\i;
         background-color: white;
     }
 </style>
+<?php if (!$entity->publishedRegistrations): ?>
+<span ng-show="data.registrationsAPIMetadata.count > 0">
+    <input ng-init="lot_evaluation=false" ng-model="lot_evaluation" type="checkbox"> Avaliação em lote
+</span>
+<?php endif; ?>
 <div id="registrations-table-container">
 <table id="registrations-table" ng-controller="RegistrationNumberController" class="js-registration-list registrations-table" ng-class="{'registrations-results': data.entity.published, 'fullscreen': data.fullscreenTable}"><!-- adicionar a classe registrations-results quando resultados publicados-->
     <thead>
@@ -58,7 +63,9 @@ use MapasCulturais\i;
     <tr>
         <td colspan='{{numberOfEnabledColumns()}}'>
             <label class="alignright"><input type="checkbox" class="hltip" ng-model="data.fullscreenTable"> <?php i::_e('Expandir tabela')?></label>
-
+            <span ng-if="lot_evaluation" ng-controller="LotEvaluationController" >
+                <mc-select  class="alignleft" model="defaultEvaluation" data="data.registrationStatusesNames" getter="getRegistrationStatus" setter="setRegistrationStatus"></mc-select>
+            </span>
             <span ng-if="!usingRegistrationsFilters() && data.registrationsAPIMetadata.count === 0"><?php i::_e("Nenhuma inscrição.");?></span>
             <span ng-if="usingRegistrationsFilters() && data.registrationsAPIMetadata.count === 0"><?php i::_e("Nenhuma inscrição encontrada com os filtros selecionados.");?></span>
             <span ng-if="!usingRegistrationsFilters() && data.registrationsAPIMetadata.count === 1"><?php i::_e("1 inscrição.");?></span>
@@ -95,12 +102,15 @@ use MapasCulturais\i;
             <td ng-show="data.registrationTableColumns.evaluation" class="registration-status-col">
                 {{reg.evaluationResultString}}
             </td>
-            <td ng-show="data.registrationTableColumns.status" class="registration-status-col">
+            <td ng-if="!lot_evaluation" ng-show="data.registrationTableColumns.status" class="registration-status-col">
                 <?php if ($entity->publishedRegistrations): ?>
                     <span class="status status-{{getStatusSlug(reg.status)}}">{{getStatusNameById(reg.status)}}</span>
                 <?php else: ?>
                     <mc-select model="reg" data="data.registrationStatusesNames" getter="getRegistrationStatus" setter="setRegistrationStatus"></mc-select>
                 <?php endif; ?>
+            </td>
+            <td ng-if="lot_evaluation" class="registration-status-col">
+                <input class="evaluation" value="{{reg.id}}" type="checkbox">
             </td>
         </tr>
     </tbody>
