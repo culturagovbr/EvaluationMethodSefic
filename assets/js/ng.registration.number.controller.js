@@ -10,11 +10,11 @@
             })
         });
 
-        $scope.$watch('data.registrations', function(){
-            angular.forEach($scope.data.registrations, (e) => {
-                e.number = "on-" + e.previousPhaseRegistrationId;
-                // e.singleUrl = e.singleUrl.replace(e.id, e.previousPhaseRegistrationId);
-            });
-        });
+        // $scope.$watch('data.registrations', function(){
+        //     angular.forEach($scope.data.registrations, (e) => {
+        //         e.previousPhaseRegistrationId = "on-" + e.previousPhaseRegistrationId;
+        //         // e.singleUrl = e.singleUrl.replace(e.id, e.previousPhaseRegistrationId);
+        //     });
+        // });
     }]);
 })(angular);

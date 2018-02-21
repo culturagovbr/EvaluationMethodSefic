@@ -23,20 +23,27 @@ use MapasCulturais\i;
     <div class="close"></div>
 </div>
 
+<p>
+    <?php if (!$entity->publishedRegistrations): ?>
+        <span ng-show="data.registrationsAPIMetadata.count > 0">
+         Avaliação em lote: <input ng-init="lot_evaluation=false" ng-model="lot_evaluation" type="checkbox">
+      </span>
+    <?php endif; ?>
+</p>
+
 <style>
     table.fullscreen {
         background-color: white;
     }
 </style>
-<?php if (!$entity->publishedRegistrations): ?>
-<span ng-show="data.registrationsAPIMetadata.count > 0">
-    <input ng-init="lot_evaluation=false" ng-model="lot_evaluation" type="checkbox"> Avaliação em lote
-</span>
-<?php endif; ?>
+
 <div id="registrations-table-container">
 <table id="registrations-table" ng-controller="RegistrationNumberController" class="js-registration-list registrations-table" ng-class="{'registrations-results': data.entity.published, 'fullscreen': data.fullscreenTable}"><!-- adicionar a classe registrations-results quando resultados publicados-->
     <thead>
         <tr>
+            <th ng-show="data.registrationTableColumns.number" class="registration-id-col">
+                <?php i::_e("Insc. Primeira Fase");?>
+            </th>
             <th ng-show="data.registrationTableColumns.number" class="registration-id-col">
                 <?php i::_e("Inscrição");?>
             </th>
@@ -80,6 +87,7 @@ use MapasCulturais\i;
     </tr>
     <tbody>
         <tr ng-repeat="reg in data.registrations | orderBy: ['-evaluationResultString', '-category'] " id="registration-{{reg.id}}" class="{{getStatusSlug(reg.status)}}" >
+            <td ng-show="data.registrationTableColumns.number" class="registration-id-col"><a href="{{reg.singleUrl}}">on-{{reg.previousPhaseRegistrationId}}</a></td>
             <td ng-show="data.registrationTableColumns.number" class="registration-id-col"><a href="{{reg.singleUrl}}">{{reg.number}}</a></td>
             <td ng-show="data.registrationTableColumns.category" class="registration-option-col" >{{(reg.category | limitTo: 50) + (reg.category.length > 50 ? '...' : '')}}</td>
             <td ng-repeat="field in data.opportunitySelectFields" ng-if="data.registrationTableColumns[field.fieldName]" class="registration-option-col">

@@ -1,6 +1,6 @@
 <div id="inscritos" class="aba-content">
     <?php if ($entity->canUser('@control')): ?>
-        <?php $this->part('singles/opportunity-registrations--tables--manager-sefic', ['entity' => $entity]) ?>
+        <?php $this->part('singles/opportunity-registrations--tables--manager-technical-sefic', ['entity' => $entity]) ?>
 
         <?php $this->part('singles/opportunity-registrations--publish-button', ['entity' => $entity]) ?>
 
