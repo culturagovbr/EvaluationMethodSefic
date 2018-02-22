@@ -11,7 +11,28 @@ use MapasCulturais\i;
             </tr>
             <tr ng-repeat="cri in ::data.criteria" ng-if="cri.sid == section.id">
                 <td><label for="{{cri.id}}">{{cri.title}}:</label></td>
-                <td><input id="{{cri.id}}" name="data[{{cri.id}}]" type="number" step="0.1" min="{{cri.min}}" max="{{cri.max}}" ng-model="evaluation[cri.id]" class="hltip" title="Configurações: min: {{cri.min}}<br>max: {{cri.max}}<br>peso: {{cri.weight}}"></td>
+                    <td>
+                        <select id="{{cri.id}}" name="data[{{cri.id}}]" ng-model="evaluation[cri.id]" ng-if="cri.title == 'Experiência'">
+                            <option>NaN</option>
+                            <option ng-selected="evaluation[cri.id] == 0" val="0">0</option>
+                            <option ng-selected="evaluation[cri.id] == 5" val="5">5</option>
+                            <option ng-selected="evaluation[cri.id] == 10" val="10">10</option>
+                        </select>
+
+                        <select id="{{cri.id}}" name="data[{{cri.id}}]" ng-model="evaluation[cri.id]" ng-if="cri.title == 'Qualificação'">
+                            <option>NaN</option>
+                            <option ng-selected="evaluation[cri.id] == 0" val="0">0</option>
+                            <option ng-selected="evaluation[cri.id] == 5" val="5">5</option>
+                            <option ng-selected="evaluation[cri.id] == 10" val="10">10</option>
+                        </select>
+
+                        <select id="{{cri.id}}" name="data[{{cri.id}}]" ng-model="evaluation[cri.id]" ng-if="cri.title == 'Bonificação por experiência'">
+                            <option>NaN</option>
+                            <option ng-selected="evaluation[cri.id] == 0" val="0">0</option>
+                            <option ng-selected="evaluation[cri.id] == 5" val="5">5</option>
+                        </select>
+                    </td>
+                <td>
             </tr>
             <tr class="subtotal">
                 <td><?php i::_e('Subtotal')?></td>
@@ -31,3 +52,4 @@ use MapasCulturais\i;
     </div>
 
 </div>
+

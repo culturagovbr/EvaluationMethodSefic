@@ -60,12 +60,12 @@
         }
 
         $scope.save = function(data){
+
             data = data || {
                 sections: $scope.data.sections,
                 criteria: $scope.data.criteria,
                 quotas: $scope.data.quotas,
             };
-
             SeficEvaluationMethodService.patchEvaluationMethodConfiguration(data).success(function () {
                 MapasCulturais.Messages.success(labels.changesSaved);
             });
@@ -78,6 +78,25 @@
 
             $timeout(function(){
                 jQuery('#' + new_id + ' header input').focus();
+            },1);
+        };
+
+        $scope.addSeficSection = function(){
+            var seficSection_id = 's-' + new Date().valueOf();
+            var criteriaId = 'c-' + new Date().valueOf();
+
+            $scope.data.sections.push({id: seficSection_id, name: '', evaluationMethod: 'sefic'});
+
+
+            $scope.data.criteria.push({id: criteriaId+1, sid: seficSection_id, title: 'Experiência', min: 0, max: 10, weight:1});
+            $scope.data.criteria.push({id: criteriaId+2, sid: seficSection_id, title: 'Qualificação', min: 0, max: 10, weight:1});
+            $scope.data.criteria.push({id: criteriaId+3, sid: seficSection_id, title: 'Bonificação por experiência', min: 0, max: 5, weight:1});
+
+
+            $scope.save();
+
+            $timeout(function(){
+                jQuery('#' + seficSection_id + ' header input').focus();
             },1);
         };
 
