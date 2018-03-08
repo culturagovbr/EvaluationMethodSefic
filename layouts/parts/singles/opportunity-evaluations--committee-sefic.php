@@ -96,7 +96,7 @@ $method = $entity->getEvaluationMethod();
                             <div data-ng-init="init($index)" ng-controller="SegmentosController">
 
                                 <div ng-repeat="tipologia in tipologiaAtuacao">
-                                    <a class="category-editable" id="category" ng-click="editBox.open('eb-tipologia-'+$parent.$index+'-'+$index, $event);"> {{tipologia.segmento ? tipologia.segmento : 'Escolha um segmento'}}</a>
+                                    <a class="category-editable" id="category" ng-click="editBox.open('eb-tipologia-'+$parent.$index+'-'+$index, $event);"> {{tipologia.nomeSegmento ? tipologia.nomeSegmento : 'Escolha um segmento'}}</a>
 
                                     <edit-box id="eb-tipologia-{{$parent.$index}}-{{$index}}" index="{{$parent.$index}}" position="bottom" cancel-label="Cancelar" submit-label="Enviar" on-submit="setTypes" on-cancel="setTypes" close-on-cancel="1">
                                         <label>
@@ -108,10 +108,9 @@ $method = $entity->getEvaluationMethod();
                                         <label ng-show="tipologia.area">
                                             segmento:
                                             <select ng-model="tipologia.segmento">
-                                                <option ng-repeat="val in tipologia._segmentos" ng-value="val">{{val}}</option>
+                                                <option ng-repeat="(key, val) in tipologia._segmentos" ng-value="key">{{val}}</option>
                                             </select>
                                         </label>
-
                                     </edit-box>
 
                                 </div>
