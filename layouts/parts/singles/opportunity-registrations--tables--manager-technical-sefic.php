@@ -87,9 +87,9 @@ use MapasCulturais\i;
     </tr>
     <tbody>
         <tr ng-repeat="reg in data.registrations | orderBy: ['-evaluationResultString', '-category'] " id="registration-{{reg.id}}" class="{{getStatusSlug(reg.status)}}" >
-            <td ng-show="data.registrationTableColumns.number" class="registration-id-col"><a href="{{reg.singleUrl}}">on-{{reg.previousPhaseRegistrationId}}</a></td>
+            <td ng-show="data.registrationTableColumns.number" class="registration-id-col">on-{{reg.previousPhaseRegistrationId}}</td>
             <td ng-show="data.registrationTableColumns.number" class="registration-id-col"><a href="{{reg.singleUrl}}">{{reg.number}}</a></td>
-            <td ng-show="data.registrationTableColumns.category" class="registration-option-col" >{{(reg.category | limitTo: 50) + (reg.category.length > 50 ? '...' : '')}}</td>
+            <td ng-show="data.registrationTableColumns.category" class="registration-option-col" >{{(reg.categoryName | limitTo: 50) + (reg.categoryName.length > 50 ? '...' : '')}}</td>
             <td ng-repeat="field in data.opportunitySelectFields" ng-if="data.registrationTableColumns[field.fieldName]" class="registration-option-col">
                 {{reg[field.fieldName]}}
             </td>
