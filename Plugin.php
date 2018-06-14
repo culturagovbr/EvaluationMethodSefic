@@ -217,7 +217,8 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
             $sections = $result;
         });
 
-        $app->hook('view.partial(singles/opportunity-registrations--tables--manager-sefic):before', function(){
+        $app->hook('view.partial(singles/opportunity-registrations--tables--manager-technical-sefic):before', function(){
+
             if($this->controller->action === 'create'){
                 return;
             }
