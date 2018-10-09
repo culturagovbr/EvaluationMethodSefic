@@ -264,6 +264,7 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
                     $reg->owner = $r->owner;
                     $reg->opportunity = $target_opportunity;
                     $reg->status = Entities\Registration::STATUS_DRAFT;
+                    $reg->number = $r->number;
 
                     $reg->previousPhaseRegistrationId = $r->id;
                     $reg->category = $c;
@@ -287,7 +288,7 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
             $app->enableAccessControl();
 
             $this->finish($new_registrations);
-        });
+        }, 0);
     }
 
     public function _getConsolidatedResult(\MapasCulturais\Entities\Registration $registration) {
