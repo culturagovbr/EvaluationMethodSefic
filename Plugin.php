@@ -24,10 +24,10 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
     public function cmpValues($value1, $value2){
         $value1 = (float) $value1;
         $value2 = (float) $value2;
-        
+
         return parent::cmpValues($value1, $value2);
     }
-    
+
     protected function _register() {
         $this->registerEvaluationMethodConfigurationMetadata('sections', [
             'label' => i::__('Seções'),
@@ -230,6 +230,18 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
 
         });
 
+        $app->hook('view.partial(singles/registration-single--categories).params', function (&$params, &$template_name) {
+            $opportunity = self::getRequestedOpportunity();
+
+            if (!$opportunity) {
+                return;
+            }
+
+            if ($opportunity->slug == 'sefic') {
+                $template_name = 'singles/registration-single--categories-sefic';
+            }
+        });
+
 
         $app->hook('GET(opportunity.importLastPhaseRegistrations)', function() use($app) {
 
@@ -336,6 +348,20 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
 
     public function fetchRegistrations() {
         return true;
+    }
+
+    static function getRequestedOpportunity()
+    {
+        $app = App::i();
+
+        $opportunity = $app->view->controller->requestedEntity->opportunity;
+        $opportunity->slug = $opportunity->evaluationMethodConfiguration->getEvaluationMethod()->getSlug();
+
+        if (!$opportunity) {
+            return null;
+        }
+
+        return $opportunity;
     }
 
 }
