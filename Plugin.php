@@ -127,7 +127,8 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
     public function _init() {
         $app = App::i();
 
-        $app->hook('evaluationsReport(sefic).sections', function(Entities\Opportunity $opportunity, &$sections){
+        $_hook = "evaluationsReport(".$this->getSlug().").sections";
+        $app->hook($_hook, function(Entities\Opportunity $opportunity, &$sections){
             $i = 0;
             $get_next_color = function($last = false) use(&$i){
                 $colors = [
