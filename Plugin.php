@@ -281,18 +281,20 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
 
                     $reg->previousPhaseRegistrationId = $r->id;
                     $reg->category = $c;
-                    $reg->save(true);
+                    $reg->save(false);
 
                     if(isset($this->data['sent'])){
-                        $reg->send();
+                        $reg->send(false);
                     }
 
                     $r->nextPhaseRegistrationId = $reg->id;
-                    $r->save(true);
+                    $r->save(false);
 
                     $new_registrations[] = $reg;
                 }
             }
+
+            $app->em->flush();
 
             $target_opportunity->previousPhaseRegistrationsImported = true;
 
