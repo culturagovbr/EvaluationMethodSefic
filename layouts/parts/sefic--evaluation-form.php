@@ -20,6 +20,7 @@ use MapasCulturais\i;
 
                         <select id="{{cri.id}}" name="data[{{cri.id}}]" ng-model="evaluation[cri.id]" ng-if="cri.title == 'Qualificação'">
                             <option ng-selected="evaluation[cri.id] == 0" val="0">0</option>
+                            <option ng-selected="evaluation[cri.id] == 2" val="2">2</option>
                             <option ng-selected="evaluation[cri.id] == 5" val="5">5</option>
                             <option ng-selected="evaluation[cri.id] == 10" val="10">10</option>
                         </select>
