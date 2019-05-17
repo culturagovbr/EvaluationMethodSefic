@@ -31,23 +31,19 @@ $slug = $_params['opportunity']->evaluationMethodConfiguration->getEvaluationMet
 <article class="main-content registration" ng-controller="OpportunityController">
 
     <?php $this->part('singles/registration--header', $_params); ?>
-    
+
     <article>
         <?php $this->applyTemplateHook('form','begin'); ?>
-        
+
         <?php $this->part('singles/registration-edit--header', $_params) ?>
 
-        <?php if($slug == "sefic"):?>
-            <?php $this->part('singles/registration-edit--categories-sefic', $_params) ?>
-        <?php else:?>
-            <?php $this->part('singles/registration-edit--categories', $_params) ?>
-        <?php endif;?>
-        
+        <?php $this->part('singles/registration-edit--categories', $_params) ?>
+
         <?php $this->part('singles/registration-edit--agents', $_params) ?>
-        
+
         <?php // Desabilitando este template por enquanto, pois não é a melhor forma de apresentar para o usuário que está se inscrevendo ?>
         <?php //$this->part('singles/registration-edit--seals', $_params) ?>
-        
+
         <?php $this->part('singles/registration-edit--fields', $_params) ?>
 
         <?php if(!$entity->preview): ?>

@@ -38,11 +38,11 @@
                 <span ng-if="usingFilters() && data.evaluationsAPIMetadata.count > 1">{{data.evaluationsAPIMetadata.count}} <?php \MapasCulturais\i::_e("inscrições encontradas com os filtros selecionados.");?></span>
             </td>
         </tr>
-        
+
         <tr ng-repeat="evaluation in data.evaluations" id="registration-{{evaluation.registration.id}}" >
             <td class="registration-id-col"><strong>{{evaluation.registration.number}}</strong></td>
             <td class="registration-id-col">{{evaluation.valuer.name}}</td>
-            <td class="registration-option-col">{{evaluation.registration.category}}</td>
+            <td class="registration-option-col">{{evaluation.registration.categoryName}}</td>
             <td class="registration-agents-col">
                 <p>
                     <span class="label"><?php \MapasCulturais\i::_e("Responsável");?></span><br />

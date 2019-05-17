@@ -16,10 +16,10 @@
                 });
         };
 
-        $scope.$watch('data.registrations', function(){
-            angular.forEach($scope.data.registrations, (e) => {
-                getCategoryName(e).then((v) => {
-                    e.categoryName = v;
+        $scope.$watch('data.evaluations', function(){
+            angular.forEach($scope.data.evaluations, (e) => {
+                getCategoryName(e.registration).then((v) => {
+                    e.registration.categoryName = v;
                 });
             });
         });
