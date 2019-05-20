@@ -55,7 +55,7 @@
         </tr>
         <tr ng-repeat="evaluation in data.evaluations" id="registration-{{evaluation.registration.id}}">
             <td class="registration-id-col"><a href="{{evaluation.registration.singleUrl}}">{{evaluation.registration.number}}</a></td>
-            <td class="registration-option-col">{{evaluation.registration.category}}</td>
+            <td class="registration-option-col">{{evaluation.registration.categoryName}}</td>
             <td class="registration-agents-col">
                 <p>
                     <span class="label"><?php \MapasCulturais\i::_e("Responsável");?></span><br />
@@ -70,7 +70,7 @@
             <td ng-if="data.entity.registrationFileConfigurations.length > 0" class="registration-attachments-col">
                 <a ng-if="evaluation.registration.files.zipArchive.url" class="icon icon-download" href="{{evaluation.registration.files.zipArchive.url}}"><div class="screen-reader-text"><?php \MapasCulturais\i::_e("Baixar arquivos");?></div></a>
             </td>
-            <td class="registration-status-col"> 
+            <td class="registration-status-col">
                 <div ng-show="::getEvaluationResultString(evaluation)">
                     <strong>{{::getEvaluationStatusLabel(evaluation)}} / {{::getEvaluationResultString(evaluation)}}</strong>
                 </div>
