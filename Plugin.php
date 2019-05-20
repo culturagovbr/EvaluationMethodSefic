@@ -231,7 +231,8 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
 
         });
 
-        $app->hook('view.partial(singles/registration-single--categories).params', function (&$params, &$template_name) {
+
+        $app->hook('view.partial(singles/registration-single--<<header|categories|agents>>).params', function (&$params, &$template) {
             $opportunity = self::getRequestedOpportunity();
 
             if (!$opportunity) {
@@ -239,7 +240,11 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
             }
 
             if ($opportunity->slug == 'sefic') {
-                $template_name = 'singles/registration-single--categories-sefic';
+                $params['entity'] = $this->controller->requestedEntity;
+                $params['opportunity'] = $opportunity;
+                if($template == 'singles/registration-single--categories'){
+                    $template = 'singles/registration-single--categories-sefic';
+                }
             }
         });
 
