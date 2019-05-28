@@ -190,8 +190,8 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
                                 continue;
                             }
 
-                            $val = isset($evaluation->evaluationData->{$crit->id}) ? $evaluation->evaluationData->{$crit->id} : 0;
-
+                            $val = isset($evaluation->evaluationData->{$crit->id}) ? (float) $evaluation->evaluationData->{$crit->id} : 0;
+                            $weight = (float) $crit->weight;
                             $rersult += $val * $crit->weight;
 
                         }
