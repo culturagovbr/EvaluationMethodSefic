@@ -93,17 +93,16 @@ return array(
     // Ronaldo (Agente 51035 Usr 25089)
 
     // 2. Redistribuir igualmente entre:
-    // Diego Alexander
+    // Diego Alexander (Agente 57999 Usr 29436)
     // Ana Taveira (Agente 57508 Usr 29147)
+    // Adriana Nunes (Agente 49295 Usr 23755)
     // Articio Oliveira (Agente 57365 Usr 20937)
     // Everaldo Silva (Agente 8561 Usr 313585)
     // Guilherme Bruno (Agente 57414 Usr 29079)
-    // Mayara Melo (Agente 57379 Usr 29050)
     // Miguel Coral (Agente 50071 Usr 24362)
     // Pablo Santiago (Agente 51192 Usr 25181)
     // Priscilla Bento (Agente 57174 Usr 28883)
     // Ronaldo Gomes (Agente 51035 Usr 25089)
-
     // - A redistribuição requer:
     // Remover as inscrições pendentes de avaliação dos avaliadores André e Ronaldo
     // Inclusão do user_id na coluna "valuers_exception_list" da tabela registration
@@ -117,15 +116,46 @@ return array(
         );
 
         $avaliadores_novos = array(
-            '29147',
-            '20937',
-            '313585',
-            '29079',
-            '29050',
-            '24362',
-            '25181',
-            '28883',
-            '25089'
+            array(
+                'id' => '29436',
+                'qtd' => 150
+            ),
+            array(
+                'id' => '29147',
+                'qtd' => 100
+            ),
+            array(
+                'id' => '23755',
+                'qtd' => 40
+            ),
+            array(
+                'id' => '20937',
+                'qtd' => 79
+            ),
+            array(
+                'id' => '313585',
+                'qtd' => 79
+            ),
+            array(
+                'id' => '29079',
+                'qtd' => 80
+            ),
+            array(
+                'id' => '24362',
+                'qtd' => 150
+            ),
+            array(
+                'id' => '25181',
+                'qtd' => 150
+            ),
+            array(
+                'id' => '28883',
+                'qtd' => 100
+            ),
+            array(
+                'id' => '25089',
+                'qtd' => 100
+            )
         );
 
         $permissions = array(
@@ -137,7 +167,7 @@ return array(
         );
 
         $avaliadores = implode(',', $avaliadores_cancelados);
-        $avaliacoes_pendentes = $conn->fetchAll("
+        $avaliacoes_andre = $conn->fetchAll("
             SELECT
                 r.*
             FROM
@@ -148,18 +178,99 @@ return array(
                 pcache p ON
                     r.id = p.object_id AND
                     p.object_type = 'MapasCulturais\Entities\Registration' AND
-                    p.user_id IN ($avaliadores) AND
+                    p.user_id = $avaliadores_cancelados[0] AND
                     p.action = 'evaluate'
             WHERE
                 r.opportunity_id = $oportunidade_id AND
                 re.id IS NULL;
         ");
 
-        // Remover o avaliador atual das avaliações pendentes
+        $avaliacoes_ronaldo = $conn->fetchAll("
+            SELECT
+                r.*
+            FROM
+                registration r
+            LEFT JOIN
+                registration_evaluation re ON r.id = re.registration_id
+            JOIN
+                pcache p ON
+                    r.id = p.object_id AND
+                    p.object_type = 'MapasCulturais\Entities\Registration' AND
+                    p.user_id = $avaliadores_cancelados[1] AND
+                    p.action = 'evaluate'
+            WHERE
+                r.opportunity_id = $oportunidade_id AND
+                re.id IS NULL;
+        ");
 
-        // Incluir novos avaliadores na registration->valuers_exception_list
+        foreach($avaliacoes_ronaldo as $a) {
+            $reg_id[] = $a['id'];
+            $first_phase_reg_id[] = explode('on-', $a['number'])[1];
+        }
 
-        // Incluir permissões para os avaliadores na pcache
+        foreach($avaliacoes_andre as $a) {
+            $reg_id[] = $a['id'];
+            $first_phase_reg_id[] = explode('on-', $a['number'])[1];
+        }
+
+        $reg_id = implode(',', $reg_id);
+
+        $delete_pcache = "
+             DELETE FROM pcache WHERE user_id IN ($avaliadores) AND object_id IN ($reg_id) AND object_type = 'MapasCulturais\Entities\Registration';
+        ";
+
+        $reg_id = explode(',', $reg_id);
+
+        $offset = 0;
+        foreach($avaliadores_novos as $a){
+            $user_id = $a['id'];
+
+            $registrations = array_slice($reg_id, $offset, $a['qtd'], true);
+            $first_phase_registrations = array_slice($first_phase_reg_id, $offset, $a['qtd'], true);
+
+            foreach($registrations as $r){
+                $insert_pcache[] = "
+                    INSERT INTO pcache (user_id, action, create_timestamp, object_type, object_id)
+                    VALUES
+                        ($user_id, '$permissions[0]', now(), 'MapasCulturais\Entities\Registration', $r),
+                        ($user_id, '$permissions[1]', now(), 'MapasCulturais\Entities\Registration', $r),
+                        ($user_id, '$permissions[2]', now(), 'MapasCulturais\Entities\Registration', $r),
+                        ($user_id, '$permissions[3]', now(), 'MapasCulturais\Entities\Registration', $r),
+                        ($user_id, '$permissions[4]', now(), 'MapasCulturais\Entities\Registration', $r)
+                ";
+            }
+
+            $registrations = implode(',', $registrations);
+            $first_phase_registrations = implode(',', $first_phase_registrations);
+            $update_registration[] = "
+                UPDATE registration
+                SET
+                    valuers_exceptions_list = '{\"include\": [$user_id], \"exclude\": []}'
+                WHERE
+                    id IN ($registrations) OR id IN ($first_phase_registrations);
+            ";
+
+            $offset += $a['qtd'];
+        }
+
+        try {
+            $conn->beginTransaction();
+
+            $conn->executeQuery($delete_pcache);
+
+            foreach ($update_registration as $q) {
+                $conn->executeQuery($q);
+            }
+
+            foreach($insert_pcache as $q) {
+                $conn->executeQuery($q);
+            }
+
+            $conn->commit();
+        } catch (Exception $e) {
+            $conn->rollback();
+            $app->log->debug($e->getMessage());
+        }
 
         return false;
 
