@@ -288,6 +288,10 @@ return array(
                 $conn->executeQuery($q);
             }
 
+            foreach($update_agentrelation as $q) {
+                $conn->executeQuery($q);
+            }
+
             $conn->commit();
         } catch (Exception $e) {
             $conn->rollback();
