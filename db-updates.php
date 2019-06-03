@@ -96,7 +96,7 @@ return array(
     // Diego Alexander (Agente 57999 Usr 29436)
     // Ana Taveira (Agente 57508 Usr 29147)
     // Adriana Nunes (Agente 49295 Usr 23755)
-    // Articio Oliveira (Agente 57365 Usr 20937)
+    // Arlicio Oliveira (Agente 57365 Usr 29037)
     // Everaldo Silva (Agente 8561 Usr 313585)
     // Guilherme Bruno (Agente 57414 Usr 29079)
     // Miguel Coral (Agente 50071 Usr 24362)
@@ -109,6 +109,7 @@ return array(
     // Inclusão das permissões (evaluate, view, viewPrivateData, viewPrivateFiles, viewUserEvaluation) para avaliação na tabela pcache
     'Redistribute pending evaluations in opportunity 1275' => function() use($conn, $app){
         $oportunidade_id = 1275;
+        $evaluationmethod_id = 1008;
 
         $avaliadores_cancelados = array(
             '29120',
@@ -118,42 +119,52 @@ return array(
         $avaliadores_novos = array(
             array(
                 'id' => '29436',
+                'agent_id' => '57999',
                 'qtd' => 150
             ),
             array(
                 'id' => '29147',
+                'agent_id' => '57508',
                 'qtd' => 100
             ),
             array(
                 'id' => '23755',
+                'agent_id' => '49295',
                 'qtd' => 40
             ),
             array(
-                'id' => '20937',
+                'id' => '29037',
+                'agent_id' => '57365',
                 'qtd' => 79
             ),
             array(
                 'id' => '313585',
+                'agent_id' => '8561',
                 'qtd' => 79
             ),
             array(
                 'id' => '29079',
+                'agent_id' => '57414',
                 'qtd' => 80
             ),
             array(
                 'id' => '24362',
+                'agent_id' => '50071',
                 'qtd' => 150
             ),
             array(
                 'id' => '25181',
+                'agent_id' => '51192',
                 'qtd' => 150
             ),
             array(
                 'id' => '28883',
+                'agent_id' => '57174',
                 'qtd' => 100
             ),
             array(
                 'id' => '25089',
+                'agent_id' => '51035',
                 'qtd' => 100
             )
         );
@@ -224,6 +235,7 @@ return array(
         $offset = 0;
         foreach($avaliadores_novos as $a){
             $user_id = $a['id'];
+            $agent_id = $a['agent_id'];
 
             $registrations = array_slice($reg_id, $offset, $a['qtd'], true);
             $first_phase_registrations = array_slice($first_phase_reg_id, $offset, $a['qtd'], true);
@@ -250,6 +262,16 @@ return array(
                     id IN ($registrations) OR id IN ($first_phase_registrations);
             ";
 
+            $update_agentrelation[] = "
+                UPDATE agent_relation
+                SET
+                    status = 1
+                WHERE
+                    object_type = 'MapasCulturais\Entities\EvaluationMethodConfiguration' AND
+                    object_id = $evaluationmethod_id AND
+                    agent_id = $agent_id
+            ";
+
             $offset += $a['qtd'];
         }
 
@@ -271,8 +293,6 @@ return array(
             $conn->rollback();
             $app->log->debug($e->getMessage());
         }
-
-        return false;
 
     }
 
