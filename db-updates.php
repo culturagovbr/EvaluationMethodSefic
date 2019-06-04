@@ -85,28 +85,6 @@ return array(
         }
     },
 
-    // Opportunity ID = 1275
-    // Evaluation Method Configuration ID = 1008
-
-    // 1. Pegar todas as inscrições pendentes de avaliação com
-    // André (Agente 57570 Usr 29120)
-    // Ronaldo (Agente 51035 Usr 25089)
-
-    // 2. Redistribuir igualmente entre:
-    // Diego Alexander (Agente 57999 Usr 29436)
-    // Ana Taveira (Agente 57508 Usr 29147)
-    // Adriana Nunes (Agente 49295 Usr 23755)
-    // Arlicio Oliveira (Agente 57365 Usr 29037)
-    // Everaldo Silva (Agente 8561 Usr 313585)
-    // Guilherme Bruno (Agente 57414 Usr 29079)
-    // Miguel Coral (Agente 50071 Usr 24362)
-    // Pablo Santiago (Agente 51192 Usr 25181)
-    // Priscilla Bento (Agente 57174 Usr 28883)
-    // Ronaldo Gomes (Agente 51035 Usr 25089)
-    // - A redistribuição requer:
-    // Remover as inscrições pendentes de avaliação dos avaliadores André e Ronaldo
-    // Inclusão do user_id na coluna "valuers_exception_list" da tabela registration
-    // Inclusão das permissões (evaluate, view, viewPrivateData, viewPrivateFiles, viewUserEvaluation) para avaliação na tabela pcache
     'Redistribute pending evaluations in opportunity 1275' => function() use($conn, $app){
         $oportunidade_id = 1275;
         $evaluationmethod_id = 1008;
@@ -120,52 +98,47 @@ return array(
             array(
                 'id' => '29436',
                 'agent_id' => '57999',
-                'qtd' => 150
+                'qtd' => 159
             ),
             array(
                 'id' => '29147',
                 'agent_id' => '57508',
-                'qtd' => 100
+                'qtd' => 109
             ),
             array(
                 'id' => '23755',
                 'agent_id' => '49295',
-                'qtd' => 40
+                'qtd' => 49
             ),
             array(
                 'id' => '29037',
                 'agent_id' => '57365',
-                'qtd' => 79
-            ),
-            array(
-                'id' => '313585',
-                'agent_id' => '8561',
-                'qtd' => 79
+                'qtd' => 88
             ),
             array(
                 'id' => '29079',
                 'agent_id' => '57414',
-                'qtd' => 80
+                'qtd' => 89
             ),
             array(
                 'id' => '24362',
                 'agent_id' => '50071',
-                'qtd' => 150
+                'qtd' => 159
             ),
             array(
                 'id' => '25181',
                 'agent_id' => '51192',
-                'qtd' => 150
+                'qtd' => 159
             ),
             array(
                 'id' => '28883',
                 'agent_id' => '57174',
-                'qtd' => 100
+                'qtd' => 109
             ),
             array(
                 'id' => '25089',
                 'agent_id' => '51035',
-                'qtd' => 100
+                'qtd' => 107
             )
         );
 
