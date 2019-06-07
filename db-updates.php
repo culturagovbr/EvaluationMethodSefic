@@ -271,6 +271,75 @@ return array(
             $app->log->debug($e->getMessage());
         }
 
+    },
+
+    'Remove categories from inactive evaluators' => function() use($conn, $app) {
+        // Remover as categorias dos avaliadores André (agent 57470 e usr 29120) e Ronaldo (agent 51035 e usr 25089)
+        // Na tabela evaluationmethodconfiguration_meta, chave 'fetchCategories'
+        $categories = $conn->fetchAll("
+            SELECT *
+            FROM evaluationmethodconfiguration_meta
+            WHERE object_id=1008 and key='fetchCategories'
+        ");
+
+        $evaluator_categories = json_decode($categories[0]['value'], true);
+
+        $evaluator_categories[29120] = '';
+        $evaluator_categories[25089] = '';
+
+        $evaluator_categories = json_encode($evaluator_categories);
+
+        $update_categories = "
+            UPDATE evaluationmethodconfiguration_meta
+            SET value = '$evaluator_categories'
+            WHERE id = {$categories[0]['id']}
+        ";
+
+        // Pegar avaliações pendentes com eles em que eles não estão na lista de exceção
+        $inscricoes = $conn->fetchAll( "
+            SELECT
+                r.id
+            FROM
+                registration r
+            JOIN
+                pcache p ON r.id = p.object_id and
+                p.object_type = 'MapasCulturais\Entities\Registration' and
+                p.user_id IN (25089, 29120) and
+                p.action = 'evaluate'
+            WHERE
+                r.opportunity_id = 1275 and
+                r.valuers_exceptions_list != '{\"include\": [], \"exclude\": []}' and
+                r.valuers_exceptions_list != '{\"include\": [25089], \"exclude\": []}';
+        ");
+
+        foreach($inscricoes as $i) {
+            $insc_id[] = $i['id'];
+        }
+
+        $insc_id = implode(',', $insc_id);
+
+        // Remover as entradas no pcache desses avaliadores com essas inscrições
+        $delete_pcache = "
+            DELETE FROM pcache
+            WHERE
+                object_id IN ($insc_id)
+                AND object_type = 'MapasCulturais\Entities\Registration'
+                AND user_id IN (25089, 29120)
+                AND action IN ('evaluate', 'view', 'viewPrivateData', 'viewPrivateFiles', 'viewUserEvaluation');
+        ";
+
+        try {
+            $conn->beginTransaction();
+
+            $conn->executeQuery($update_categories);
+
+            $conn->executeQuery($delete_pcache);
+
+            $conn->commit();
+        } catch (Exception $e) {
+            $conn->rollback();
+            $app->log->debug($e->getMessage());
+        }
     }
 
 );
