@@ -271,6 +271,46 @@ return array(
             $app->log->debug($e->getMessage());
         }
 
+    },
+
+    'Select registrations that had enough points on their evaluations' => function() use($conn, $app) {
+        // Selecionar as inscrições que tenham avaliação com pontuação mínima de 15
+        $inscricoes = $conn->fetchAll("
+            SELECT
+                r.id
+            FROM registration r
+            JOIN registration_evaluation re ON r.id = re.registration_id
+            WHERE r.opportunity_id = 1275 AND r.consolidated_result::float >= 15;
+        ");
+
+        foreach($inscricoes as $i) {
+            $insc_id[] = $i['id'];
+        }
+
+        $insc_id = implode(',', $insc_id);
+
+        // Atualizar as inscrições com status = 10
+
+        $update_registrations = "
+            UPDATE
+                registration
+            SET
+                status = 10
+            WHERE
+                id IN ($insc_id)
+        ";
+
+        try {
+            $conn->beginTransaction();
+
+            $conn->executeQuery($update_registrations);
+
+            $conn->commit();
+        } catch (Exception $e) {
+            $conn->rollback();
+            $app->log->debug($e->getMessage());
+        }
+
     }
 
 );
