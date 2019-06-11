@@ -339,7 +339,7 @@ class Plugin extends \EvaluationMethodTechnical\Plugin {
                 return null;
             } else {
                 $val = $evaluation->evaluationData->$key;
-                $total += $cri->weight * $val;
+                $total += is_numeric($val) ? $cri->weight * $val : 0;
             }
         }
 

@@ -301,6 +301,9 @@ return array(
                 r.id
             FROM
                 registration r
+            LEFT JOIN
+                registration_evaluation re ON re.registration_id = r.id and
+                re.user_id IN (25089, 29120)
             JOIN
                 pcache p ON r.id = p.object_id and
                 p.object_type = 'MapasCulturais\Entities\Registration' and
@@ -308,6 +311,7 @@ return array(
                 p.action = 'evaluate'
             WHERE
                 r.opportunity_id = 1275 and
+                re.id is null and
                 r.valuers_exceptions_list != '{\"include\": [], \"exclude\": []}' and
                 r.valuers_exceptions_list != '{\"include\": [25089], \"exclude\": []}';
         ");
@@ -328,6 +332,57 @@ return array(
                 AND action IN ('evaluate', 'view', 'viewPrivateData', 'viewPrivateFiles', 'viewUserEvaluation');
         ";
 
+        // Incluir avaliadores André e Ronaldo como exceção nas inscrições em que eles já avaliaram
+        $avaliacoes_andre = $conn->fetchAll("
+            SELECT
+                r.id, r.number
+            FROM
+                registration r
+            JOIN
+                registration_evaluation re ON r.id = re.registration_id
+            WHERE
+                r.opportunity_id = 1275 and
+                re.user_id = 29120;
+        ");
+
+        $avaliacoes_ronaldo = $conn->fetchAll("
+            SELECT
+                r.id, r.number
+            FROM
+                registration r
+            JOIN
+                registration_evaluation re ON r.id = re.registration_id
+            WHERE
+                r.opportunity_id = 1275 and
+                re.user_id = 25089;
+        ");
+
+        foreach($avaliacoes_ronaldo as $a) {
+            $reg_id = $a['id'];
+            $first_phase_reg_id = explode('on-', $a['number'])[1];
+
+            $update_registrations[] = "
+                UPDATE registration
+                SET
+                    valuers_exceptions_list = '{\"include\": [25089], \"exclude\": []}'
+                WHERE
+                    id = $reg_id;
+            ";
+        }
+
+        foreach($avaliacoes_andre as $a) {
+            $reg_id = $a['id'];
+            $first_phase_reg_id = explode('on-', $a['number'])[1];
+
+            $update_registrations[] = "
+                UPDATE registration
+                SET
+                    valuers_exceptions_list = '{\"include\": [29120], \"exclude\": []}'
+                WHERE
+                    id = $reg_id;
+            ";
+        }
+
         try {
             $conn->beginTransaction();
 
@@ -335,11 +390,16 @@ return array(
 
             $conn->executeQuery($delete_pcache);
 
+            foreach($update_registrations as $q) {
+                $conn->executeQuery($q);
+            }
+
             $conn->commit();
         } catch (Exception $e) {
             $conn->rollback();
             $app->log->debug($e->getMessage());
         }
+
     }
 
 );
