@@ -296,25 +296,44 @@ return array(
         ";
 
         // Pegar avaliações pendentes com eles em que eles não estão na lista de exceção
-        $inscricoes = $conn->fetchAll( "
+        $pendencias_incorretas_r = $conn->fetchAll("
             SELECT
                 r.id
             FROM
                 registration r
             LEFT JOIN
                 registration_evaluation re ON re.registration_id = r.id and
-                re.user_id IN (25089, 29120)
+                re.user_id = 25089
             JOIN
                 pcache p ON r.id = p.object_id and
                 p.object_type = 'MapasCulturais\Entities\Registration' and
-                p.user_id IN (25089, 29120) and
+                p.user_id = 25089 and
                 p.action = 'evaluate'
             WHERE
                 r.opportunity_id = 1275 and
                 re.id is null and
-                r.valuers_exceptions_list != '{\"include\": [], \"exclude\": []}' and
                 r.valuers_exceptions_list != '{\"include\": [25089], \"exclude\": []}';
         ");
+
+        $pendencias_incorretas_a = $conn->fetchAll("
+            SELECT
+                r.id
+            FROM
+                registration r
+            LEFT JOIN
+                registration_evaluation re ON re.registration_id = r.id and
+                re.user_id = 29120
+            JOIN
+                pcache p ON r.id = p.object_id and
+                p.object_type = 'MapasCulturais\Entities\Registration' and
+                p.user_id = 29120 and
+                p.action = 'evaluate'
+            WHERE
+                r.opportunity_id = 1275 and
+                re.id is null;
+        ");
+
+        $inscricoes = array_merge($pendencias_incorretas_a, $pendencias_incorretas_r);
 
         foreach($inscricoes as $i) {
             $insc_id[] = $i['id'];
