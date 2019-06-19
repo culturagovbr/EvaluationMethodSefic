@@ -333,21 +333,36 @@ return array(
                 re.id is null;
         ");
 
-        $inscricoes = array_merge($pendencias_incorretas_a, $pendencias_incorretas_r);
+        // $inscricoes = array_merge($pendencias_incorretas_a, $pendencias_incorretas_r);
 
-        foreach($inscricoes as $i) {
-            $insc_id[] = $i['id'];
+        foreach($pendencias_incorretas_a as $i) {
+            $insc_a[] = $i['id'];
         }
 
-        $insc_id = implode(',', $insc_id);
+        $insc_id = implode(',', $insc_a);
 
         // Remover as entradas no pcache desses avaliadores com essas inscrições
-        $delete_pcache = "
+        $delete_pcache_a = "
             DELETE FROM pcache
             WHERE
                 object_id IN ($insc_id)
                 AND object_type = 'MapasCulturais\Entities\Registration'
-                AND user_id IN (25089, 29120)
+                AND user_id = 29120
+                AND action IN ('evaluate', 'view', 'viewPrivateData', 'viewPrivateFiles', 'viewUserEvaluation');
+        ";
+
+        foreach($pendencias_incorretas_r as $i) {
+            $insc_r[] = $i['id'];
+        }
+
+        $insc_id = implode(',', $insc_r);
+
+        $delete_pcache_r = "
+            DELETE FROM pcache
+            WHERE
+                object_id IN ($insc_id)
+                AND object_type = 'MapasCulturais\Entities\Registration'
+                AND user_id = 25089
                 AND action IN ('evaluate', 'view', 'viewPrivateData', 'viewPrivateFiles', 'viewUserEvaluation');
         ";
 
@@ -407,7 +422,8 @@ return array(
 
             $conn->executeQuery($update_categories);
 
-            $conn->executeQuery($delete_pcache);
+            $conn->executeQuery($delete_pcache_a);
+            $conn->executeQuery($delete_pcache_r);
 
             foreach($update_registrations as $q) {
                 $conn->executeQuery($q);
