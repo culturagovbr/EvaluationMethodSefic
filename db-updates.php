@@ -297,7 +297,7 @@ return array(
         ";
 
         // Pegar avaliações pendentes com eles em que eles não estão na lista de exceção
-        $pendencias_incorretas_ronaldo = $conn->fetchAll("
+        $incorretas_ronaldo = $conn->fetchAll("
             SELECT
                 distinct r.id
             FROM
@@ -312,28 +312,11 @@ return array(
                 p.action = 'evaluate'
             WHERE
                 r.opportunity_id = 1275 and
-                re.id is null;
+                r.valuers_exceptions_list != '{\"include\": [25089], \"exclude\": []}' and
+                (re.id is null or re.status = 0);
         ");
 
-        $pendencias_incorretas_adriana = $conn->fetchAll("
-            SELECT
-                distinct r.id
-            FROM
-                registration r
-            LEFT JOIN
-                registration_evaluation re ON re.registration_id = r.id and
-                re.user_id = 23755
-            JOIN
-                pcache p ON r.id = p.object_id and
-                p.object_type = 'MapasCulturais\Entities\Registration' and
-                p.user_id = 23755 and
-                p.action = 'evaluate'
-            WHERE
-                r.opportunity_id = 1275 and
-                re.id is null;
-        ");
-
-        $pendencias_incorretas_andre = $conn->fetchAll("
+        $incorretas_andre = $conn->fetchAll("
             SELECT
                 distinct r.id
             FROM
@@ -348,12 +331,13 @@ return array(
                 p.action = 'evaluate'
             WHERE
                 r.opportunity_id = 1275 and
-                re.id is null;
+                r.valuers_exceptions_list != '{\"include\": [], \"exclude\": []}' and
+                (re.id is null or re.status = 0);
         ");
 
         // $inscricoes = array_merge($pendencias_incorretas_a, $pendencias_incorretas_r);
 
-        foreach($pendencias_incorretas_andre as $i) {
+        foreach($incorretas_andre as $i) {
             $insc_andre[] = $i['id'];
         }
 
@@ -369,7 +353,7 @@ return array(
                 AND action IN ('evaluate', 'view', 'viewPrivateData', 'viewPrivateFiles', 'viewUserEvaluation');
         ";
 
-        foreach($pendencias_incorretas_ronaldo as $i) {
+        foreach($incorretas_ronaldo as $i) {
             $insc_ronaldo[] = $i['id'];
         }
 
@@ -384,18 +368,85 @@ return array(
                 AND action IN ('evaluate', 'view', 'viewPrivateData', 'viewPrivateFiles', 'viewUserEvaluation');
         ";
 
-        foreach($pendencias_incorretas_adriana as $i) {
-            $insc_adriana[] = $i['id'];
+        $pendencias_adriana = $conn->fetchAll("
+            SELECT
+                distinct r.id, r.number
+            FROM
+                registration r
+            LEFT JOIN
+                registration_evaluation re ON re.registration_id = r.id and
+                re.user_id = 23755
+            JOIN
+                pcache p ON r.id = p.object_id and
+                p.object_type = 'MapasCulturais\Entities\Registration' and
+                p.user_id = 23755 and
+                p.action = 'evaluate'
+            WHERE
+                r.opportunity_id = 1275 and
+                (re.id is null or re.status = 0);
+        ");
+
+        $pendencias_ronaldo = $conn->fetchAll("
+            SELECT
+                distinct r.id, r.number
+            FROM
+                registration r
+            LEFT JOIN
+                registration_evaluation re ON re.registration_id = r.id and
+                re.user_id = 25089
+            JOIN
+                pcache p ON r.id = p.object_id and
+                p.object_type = 'MapasCulturais\Entities\Registration' and
+                p.user_id = 25089 and
+                p.action = 'evaluate'
+            WHERE
+                r.opportunity_id = 1275 and
+                r.valuers_exceptions_list = '{\"include\": [25089], \"exclude\": []}' and
+                (re.id is null or re.status = 0);
+        ");
+
+        $pendencias_andre = $conn->fetchAll("
+            SELECT
+                distinct r.id, r.number
+            FROM
+                registration r
+            LEFT JOIN
+                registration_evaluation re ON re.registration_id = r.id and
+                re.user_id = 29120
+            JOIN
+                pcache p ON r.id = p.object_id and
+                p.object_type = 'MapasCulturais\Entities\Registration' and
+                p.user_id = 29120 and
+                p.action = 'evaluate'
+            WHERE
+                r.opportunity_id = 1275 and
+                r.valuers_exceptions_list = '{\"include\": [], \"exclude\": []}' and
+                (re.id is null or re.status = 0);
+        ");
+
+        foreach($pendencias_adriana as $i) {
+            $pendentes[] = $i['id'];
+            $pendentes_primeira_fase[] = explode('on-', $i['number'])[1];
         }
 
-        $insc_id = implode(',', $insc_adriana);
+        foreach($pendencias_ronaldo as $i) {
+            $pendentes[] = $i['id'];
+            $pendentes_primeira_fase[] = explode('on-', $i['number'])[1];
+        }
 
-        $delete_pcache_adriana = "
+        foreach($pendencias_andre as $i) {
+            $pendentes[] = $i['id'];
+            $pendentes_primeira_fase[] = explode('on-', $i['number'])[1];
+        }
+
+        $insc_id = implode(',', array_merge($pendentes, $pendentes_primeira_fase));
+
+        $delete_pcache_pendentes = "
             DELETE FROM pcache
             WHERE
                 object_id IN ($insc_id)
                 AND object_type = 'MapasCulturais\Entities\Registration'
-                AND user_id = 23755
+                AND user_id IN (23755, 25089, 29120)
                 AND action IN ('evaluate', 'view', 'viewPrivateData', 'viewPrivateFiles', 'viewUserEvaluation');
         ";
 
@@ -409,6 +460,7 @@ return array(
                 registration_evaluation re ON r.id = re.registration_id
             WHERE
                 r.opportunity_id = 1275 and
+                re.status = 1 and
                 re.user_id = 29120;
         ");
 
@@ -421,6 +473,7 @@ return array(
                 registration_evaluation re ON r.id = re.registration_id
             WHERE
                 r.opportunity_id = 1275 and
+                re.status = 1 and
                 re.user_id = 25089;
         ");
 
@@ -433,6 +486,7 @@ return array(
                 registration_evaluation re ON r.id = re.registration_id
             WHERE
                 r.opportunity_id = 1275 and
+                re.status = 1 and
                 re.user_id = 23755;
         ");
 
@@ -477,21 +531,20 @@ return array(
 
         // Incluir Rafaela (agent 50986 usr 25061) nessas avaliações pendentes
         // Inserir na pcache e no valuers_exception_list das inscrições
-        $inscricoes_pendentes = array_merge($insc_andre, $insc_ronaldo, $insc_adriana);
-
-        foreach($inscricoes_pendentes as $r){
+        $pendentes_totais = array_merge($pendentes, $pendentes_primeira_fase);
+        foreach($pendentes_totais as $p){
             $insert_pcache[] = "
                 INSERT INTO pcache (user_id, action, create_timestamp, object_type, object_id)
                         VALUES
-                            (25061, 'evaluate', now(), 'MapasCulturais\Entities\Registration', $r),
-                            (25061, 'view', now(), 'MapasCulturais\Entities\Registration', $r),
-                            (25061, 'viewPrivateData', now(), 'MapasCulturais\Entities\Registration', $r),
-                            (25061, 'viewPrivateFiles', now(), 'MapasCulturais\Entities\Registration', $r),
-                            (25061, 'viewUserEvaluation', now(), 'MapasCulturais\Entities\Registration', $r)
+                            (25061, 'evaluate', now(), 'MapasCulturais\Entities\Registration', $p),
+                            (25061, 'view', now(), 'MapasCulturais\Entities\Registration', $p),
+                            (25061, 'viewPrivateData', now(), 'MapasCulturais\Entities\Registration', $p),
+                            (25061, 'viewPrivateFiles', now(), 'MapasCulturais\Entities\Registration', $p),
+                            (25061, 'viewUserEvaluation', now(), 'MapasCulturais\Entities\Registration', $p)
             ";
         }
 
-        $insc_id = implode(',', $inscricoes_pendentes);
+        $insc_id = implode(',', array_merge($pendentes, $pendentes_primeira_fase));
 
         $update_registrations[] = "
             UPDATE registration
@@ -508,7 +561,7 @@ return array(
 
             $conn->executeQuery($delete_pcache_andre);
             $conn->executeQuery($delete_pcache_ronaldo);
-            $conn->executeQuery($delete_pcache_adriana);
+            $conn->executeQuery($delete_pcache_pendentes);
 
             foreach($update_registrations as $q) {
                 $conn->executeQuery($q);
