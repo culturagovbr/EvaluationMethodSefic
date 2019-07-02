@@ -554,6 +554,16 @@ return array(
                     id IN ($insc_id);
         ";
 
+        // Remover as avaliações com status 0
+        $insc_id = implode(',', $pendentes);
+        $delete_registration_evaluation = "
+            DELETE FROM registration_evaluation
+            WHERE
+                registration_id IN ($insc_id)
+                AND status = 0
+                AND user_id IN (29120, 25089, 23755);
+        ";
+
         try {
             $conn->beginTransaction();
 
