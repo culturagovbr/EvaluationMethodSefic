@@ -587,6 +587,60 @@ return array(
             $app->log->debug($e->getMessage());
         }
 
+    },
+
+    'Remove duplicated evaluations' => function () use($conn, $app) {
+        $inscricoes = $conn->fetchAll("
+            SELECT re.registration_id
+			FROM registration_evaluation re
+			JOIN registration r ON r.id = re.registration_id AND r.opportunity_id = 1275
+			GROUP BY registration_id
+			HAVING count(re.id) > 1
+			ORDER BY registration_id;
+        ");
+
+        $inscricoes = array_column($inscricoes, 'registration_id');
+
+        foreach($inscricoes as $i){
+            $avaliacoes = $conn->fetchAll("
+                SELECT id,user_id
+                FROM registration_evaluation re
+                WHERE re.registration_id = $i
+                ORDER BY re.id;
+            ");
+
+            $avaliacao = array_filter($avaliacoes, function($v){
+                return $v['user_id'] === 25089;
+            });
+
+            if(count($avaliacao) === 0){
+                $avaliacao_id = $avaliacoes[0]['id'];
+            } else {
+                $avaliacao_id = min(array_column($avaliacao, 'id'));
+            }
+
+            $apagar_avaliacao[] = "
+                DELETE
+                FROM registration_evaluation re
+                WHERE re.id = {$avaliacao_id};
+            ";
+        }
+
+        try {
+            $conn->beginTransaction();
+
+            foreach ($apagar_avaliacao as $q) {
+                $conn->executeQuery($q);
+            }
+
+            $conn->commit();
+        } catch (Exception $e) {
+            $conn->rollback();
+            $app->log->debug($e->getMessage());
+        }
+
+
+        return false;
     }
 
 );
