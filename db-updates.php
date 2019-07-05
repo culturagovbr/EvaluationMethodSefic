@@ -605,31 +605,34 @@ return array(
             $avaliacoes = $conn->fetchAll("
                 SELECT id,user_id
                 FROM registration_evaluation re
-                WHERE re.registration_id = $i
+                WHERE re.registration_id = $i and re.user_id != 25089
                 ORDER BY re.id;
             ");
-
-            $avaliacao = array_filter($avaliacoes, function($v){
-                return $v['user_id'] === 25089;
-            });
-
-            if(count($avaliacao) === 0){
-                $avaliacao_id = $avaliacoes[0]['id'];
-            } else {
-                $avaliacao_id = min(array_column($avaliacao, 'id'));
-            }
 
             $apagar_avaliacao[] = "
                 DELETE
                 FROM registration_evaluation re
-                WHERE re.id = {$avaliacao_id};
+                WHERE re.id = {$avaliacoes[0]['id']};
+            ";
+
+            $apagar_pcache[] = "
+                DELETE FROM pcache
+                WHERE
+                    object_id = $i
+                    AND object_type = 'MapasCulturais\Entities\Registration'
+                    AND user_id = {$avaliacoes[0]['user_id']}
+                    AND action IN ('evaluate', 'view', 'viewPrivateData', 'viewPrivateFiles', 'viewUserEvaluation');
             ";
         }
 
         try {
             $conn->beginTransaction();
 
-            foreach ($apagar_avaliacao as $q) {
+            foreach($apagar_avaliacao as $q) {
+                $conn->executeQuery($q);
+            }
+
+            foreach($apagar_pcache as $q) {
                 $conn->executeQuery($q);
             }
 
@@ -638,9 +641,6 @@ return array(
             $conn->rollback();
             $app->log->debug($e->getMessage());
         }
-
-
-        return false;
     }
 
 );
