@@ -641,6 +641,59 @@ return array(
             $conn->rollback();
             $app->log->debug($e->getMessage());
         }
+    },
+
+    'Inserir as 19 avaliações faltantes' => function() use($conn, $app) {
+        $update_registrations = "
+            update registration set valuers_exceptions_list = '{\" include \": [25061], \" exclude \": []}' where id in (select r.id from registration r
+            left join registration_evaluation re on re.registration_id = r.id
+            where re.id is null and r.opportunity_id = 1275 and r.status = 1
+            order by r.id);
+        ";
+
+        $ids_sem_pcache = $conn->fetchAll( "
+            select r.id from registration r
+            left join registration_evaluation re on re.registration_id = r.id
+            where re.id is null and r.opportunity_id = 1275 and r.status = 1 and
+            r.id not in (select r.id from registration r
+            left join registration_evaluation re on re.registration_id = r.id
+            join pcache p on p.object_id = r.id and p.object_type = 'MapasCulturais\Entities\Registration' and p.action = 'evaluate'
+            where
+            re.id is null and
+            r.opportunity_id = 1275 and
+            r.status = 1 and
+            p.user_id = 25061);
+        ");
+
+        $ids_sem_pcache = array_column($ids_sem_pcache, 'id');
+
+        foreach($ids_sem_pcache as $i){
+            $insert_pcache[] = "
+                INSERT INTO pcache (user_id, action, create_timestamp, object_type, object_id)
+                    VALUES
+                        (25061, 'evaluate', now(), 'MapasCulturais\Entities\Registration', $i),
+                        (25061, 'view', now(), 'MapasCulturais\Entities\Registration', $i),
+                        (25061, 'viewPrivateData', now(), 'MapasCulturais\Entities\Registration', $i),
+                        (25061, 'viewPrivateFiles', now(), 'MapasCulturais\Entities\Registration', $i),
+                        (25061, 'viewUserEvaluation', now(), 'MapasCulturais\Entities\Registration', $i)
+            ";
+        }
+
+        try {
+            $conn->beginTransaction();
+
+            $conn->executeQuery($update_registrations);
+
+            foreach($insert_pcache as $q){
+                $conn->executeQuery($q);
+            }
+
+            $conn->commit();
+        } catch (Exception $e) {
+            $conn->rollback();
+            $app->log->debug($e->getMessage());
+        }
+
     }
 
 );
