@@ -643,26 +643,46 @@ return array(
         }
     },
 
-    'Inserir as 19 avaliações faltantes' => function() use($conn, $app) {
+    'Corrige contagem de avaliações' => function() use($conn, $app) {
+        $inscricoes_ja_avaliadas = "
+            DELETE FROM pcache
+            WHERE id IN (
+                SELECT p.id
+                FROM pcache p
+                JOIN registration_evaluation re ON re.registration_id = p.object_id AND re.user_id != 25061
+                JOIN registration r ON r.id = p.object_id AND r.opportunity_id = 1275
+                WHERE p.user_id = 25061 AND p.object_type = 'MapasCulturais\Entities\Registration'
+            );
+        ";
+
         $update_registrations = "
-            update registration set valuers_exceptions_list = '{\" include \": [25061], \" exclude \": []}' where id in (select r.id from registration r
-            left join registration_evaluation re on re.registration_id = r.id
-            where re.id is null and r.opportunity_id = 1275 and r.status = 1
-            order by r.id);
+            UPDATE registration
+            SET valuers_exceptions_list = '{\" include \": [25061], \" exclude \": []}'
+            WHERE id in (
+                SELECT r.id
+                FROM registration r
+                LEFT JOIN registration_evaluation re ON re.registration_id = r.id
+                WHERE re.id is null AND
+                    r.opportunity_id = 1275 AND
+                    r.status = 1
+                ORDER BY r.id
+            );
         ";
 
         $ids_sem_pcache = $conn->fetchAll( "
-            select r.id from registration r
-            left join registration_evaluation re on re.registration_id = r.id
-            where re.id is null and r.opportunity_id = 1275 and r.status = 1 and
-            r.id not in (select r.id from registration r
-            left join registration_evaluation re on re.registration_id = r.id
-            join pcache p on p.object_id = r.id and p.object_type = 'MapasCulturais\Entities\Registration' and p.action = 'evaluate'
-            where
-            re.id is null and
-            r.opportunity_id = 1275 and
-            r.status = 1 and
-            p.user_id = 25061);
+            SELECT r.id
+            FROM registration r
+            LEFT JOIN registration_evaluation re ON re.registration_id = r.id
+            WHERE re.id is null AND r.opportunity_id = 1275 AND r.status = 1 AND
+            r.id NOT IN (
+                SELECT r.id from registration r
+                LEFT JOIN registration_evaluation re ON re.registration_id = r.id
+                JOIN pcache p ON p.object_id = r.id AND p.object_type = 'MapasCulturais\Entities\Registration' AND p.action = 'evaluate'
+                WHERE re.id is null AND
+                r.opportunity_id = 1275 AND
+                r.status = 1 AND
+                p.user_id = 25061
+            );
         ");
 
         $ids_sem_pcache = array_column($ids_sem_pcache, 'id');
@@ -682,6 +702,7 @@ return array(
         try {
             $conn->beginTransaction();
 
+            $conn->executeQuery($inscricoes_ja_avaliadas);
             $conn->executeQuery($update_registrations);
 
             foreach($insert_pcache as $q){
