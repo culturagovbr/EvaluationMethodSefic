@@ -727,6 +727,19 @@ return array(
             ";
         }
 
+        $update_agentrelation = "
+            UPDATE agent_relation
+            SET status = 1
+            WHERE id = (
+                SELECT ar.id
+                FROM agent_relation ar
+                WHERE ar.object_id = 50986 AND
+                    object_id = 1008 AND
+                    object_type='MapasCulturais\Entities\EvaluationMethodConfiguration'
+
+            );
+        ";
+
         try {
             $conn->beginTransaction();
 
@@ -739,6 +752,8 @@ return array(
             foreach($insert_pcache as $q){
                 $conn->executeQuery($q);
             }
+
+            $conn->executeQuery($update_agentrelation);
 
             $conn->commit();
         } catch (Exception $e) {
