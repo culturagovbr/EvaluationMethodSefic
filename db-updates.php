@@ -685,7 +685,7 @@ return array(
 
         $update_registrations = "
             UPDATE registration
-            SET valuers_exceptions_list = '{\" include \": [25061], \" exclude \": []}'
+            SET valuers_exceptions_list = '{\"include\": [25061], \"exclude\": []}'
             WHERE id in (
                 SELECT r.id
                 FROM registration r
