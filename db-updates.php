@@ -643,17 +643,45 @@ return array(
         }
     },
 
-    'Corrige contagem de avaliações' => function() use($conn, $app) {
-        $inscricoes_ja_avaliadas = "
-            DELETE FROM pcache
-            WHERE id IN (
-                SELECT p.id
-                FROM pcache p
-                JOIN registration_evaluation re ON re.registration_id = p.object_id AND re.user_id != 25061
-                JOIN registration r ON r.id = p.object_id AND r.opportunity_id = 1275
-                WHERE p.user_id = 25061 AND p.object_type = 'MapasCulturais\Entities\Registration'
-            );
-        ";
+    'Fix permission cache for opportunity 1275' => function() use($conn, $app) {
+        $avaliadores = [
+            '10353',
+            '12245',
+            '15334',
+            '15438',
+            '23755',
+            '24362',
+            '25056',
+            '25061',
+            '25089',
+            '25092',
+            '25181',
+            '28883',
+            '28928',
+            '29037',
+            '29050',
+            '29053',
+            '29079',
+            '29120',
+            '29147',
+            '29166',
+            '29167',
+            '29436',
+            '313585'
+        ];
+
+        foreach($avaliadores as $a){
+            $delete_pcache[] = "
+                DELETE FROM pcache
+                WHERE id IN (
+                    SELECT p.id
+                    FROM pcache p
+                    JOIN registration_evaluation re ON re.registration_id = p.object_id AND re.user_id != $a
+                    JOIN registration r ON r.id = p.object_id AND r.opportunity_id = 1275
+                    WHERE p.user_id = $a AND p.object_type = 'MapasCulturais\Entities\Registration'
+                );
+            ";
+        }
 
         $update_registrations = "
             UPDATE registration
@@ -702,7 +730,10 @@ return array(
         try {
             $conn->beginTransaction();
 
-            $conn->executeQuery($inscricoes_ja_avaliadas);
+            foreach($delete_pcache as $q){
+                $conn->executeQuery($q);
+            }
+
             $conn->executeQuery($update_registrations);
 
             foreach($insert_pcache as $q){
