@@ -733,7 +733,7 @@ return array(
             WHERE id = (
                 SELECT ar.id
                 FROM agent_relation ar
-                WHERE ar.object_id = 50986 AND
+                WHERE ar.agent_id = 50986 AND
                     object_id = 1008 AND
                     object_type='MapasCulturais\Entities\EvaluationMethodConfiguration'
 
