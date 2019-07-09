@@ -807,6 +807,56 @@ return array(
             $conn->rollback();
             $app->log->debug($e->getMessage());
         }
+    },
+
+    'Include evaluators on first phase registration exception' => function() use($conn, $app) {
+        $pending_evaluations = $conn->fetchAll("
+            SELECT r.id, r.number, r.valuers_exceptions_list
+            FROM registration r
+            LEFT JOIN registration_evaluation re ON re.registration_id = r.id AND re.status > 0
+            WHERE re.id IS NULL AND
+                r.opportunity_id = 1275 AND
+                r.status = 1
+            ORDER BY r.valuers_exceptions_list;
+        ");
+
+        foreach($pending_evaluations as $p) {
+            $first_phase_id = explode('on-', $p['number'])[1];
+
+            $first_registration = $conn->fetchAll("
+                SELECT r.id, r.valuers_exceptions_list
+                FROM registration r
+                WHERE r.id = {$first_phase_id};
+            ");
+
+            $first_exceptions = json_decode($first_registration[0]['valuers_exceptions_list']);
+            $exceptions = json_decode($p['valuers_exceptions_list']);
+
+            if(!isset($first_exceptions->include[0]) || $first_exceptions->include[0] != $exceptions->include[0]){
+                $first_exceptions->include[] = $exceptions->include[0];
+            }
+
+            $valuers_exceptions_list = json_encode($first_exceptions);
+
+            $update_first_phase[] = "
+                UPDATE registration
+                SET valuers_exceptions_list = '{$valuers_exceptions_list}'
+                WHERE id = {$first_phase_id};
+            ";
+        }
+
+        try {
+            $conn->beginTransaction();
+
+            foreach ($update_first_phase as $q) {
+                $conn->executeQuery($q);
+            }
+
+            $conn->commit();
+        } catch (Exception $e) {
+            $conn->rollback();
+            $app->log->debug($e->getMessage());
+        }
     }
 
 );
