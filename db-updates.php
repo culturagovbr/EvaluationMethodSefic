@@ -273,6 +273,60 @@ return array(
 
     },
 
+    'Remove duplicated evaluations' => function () use ($conn, $app) {
+        $inscricoes = $conn->fetchAll("
+            SELECT re.registration_id
+			FROM registration_evaluation re
+			JOIN registration r ON r.id = re.registration_id AND r.opportunity_id = 1275
+			GROUP BY registration_id
+			HAVING count(re.id) > 1
+			ORDER BY registration_id;
+        ");
+
+        $inscricoes = array_column($inscricoes, 'registration_id');
+
+        foreach ($inscricoes as $i) {
+            $avaliacoes = $conn->fetchAll("
+                SELECT id,user_id
+                FROM registration_evaluation re
+                WHERE re.registration_id = $i and re.user_id != 25089
+                ORDER BY re.id;
+            ");
+
+            $apagar_avaliacao[] = "
+                DELETE
+                FROM registration_evaluation re
+                WHERE re.id = {$avaliacoes[0]['id']};
+            ";
+
+            $apagar_pcache[] = "
+                DELETE FROM pcache
+                WHERE
+                    object_id = $i
+                    AND object_type = 'MapasCulturais\Entities\Registration'
+                    AND user_id = {$avaliacoes[0]['user_id']}
+                    AND action IN ('evaluate', 'view', 'viewPrivateData', 'viewPrivateFiles', 'viewUserEvaluation');
+            ";
+        }
+
+        try {
+            $conn->beginTransaction();
+
+            foreach ($apagar_avaliacao as $q) {
+                $conn->executeQuery($q);
+            }
+
+            foreach ($apagar_pcache as $q) {
+                $conn->executeQuery($q);
+            }
+
+            $conn->commit();
+        } catch (Exception $e) {
+            $conn->rollback();
+            $app->log->debug($e->getMessage());
+        }
+    },
+
     'Remove categories from inactive evaluators' => function() use($conn, $app) {
         // Remover as categorias dos avaliadores André (agent 57470 e usr 29120), Ronaldo (agent 51035 e usr 25089) e Adriana (agent 49295 e usr 23755)
         // Na tabela evaluationmethodconfiguration_meta, chave 'fetchCategories'
@@ -313,7 +367,7 @@ return array(
             WHERE
                 r.opportunity_id = 1275 and
                 r.valuers_exceptions_list != '{\"include\": [25089], \"exclude\": []}' and
-                (re.id is null or re.status = 0);
+                re.id is null;
         ");
 
         $incorretas_andre = $conn->fetchAll("
@@ -332,7 +386,7 @@ return array(
             WHERE
                 r.opportunity_id = 1275 and
                 r.valuers_exceptions_list != '{\"include\": [], \"exclude\": []}' and
-                (re.id is null or re.status = 0);
+                re.id is null;
         ");
 
         // $inscricoes = array_merge($pendencias_incorretas_a, $pendencias_incorretas_r);
@@ -368,7 +422,7 @@ return array(
                 AND action IN ('evaluate', 'view', 'viewPrivateData', 'viewPrivateFiles', 'viewUserEvaluation');
         ";
 
-        $pendencias_adriana = $conn->fetchAll("
+        $pendencias_adriana = $conn->fetchAll( "
             SELECT
                 distinct r.id, r.number
             FROM
@@ -383,7 +437,8 @@ return array(
                 p.action = 'evaluate'
             WHERE
                 r.opportunity_id = 1275 and
-                (re.id is null or re.status = 0);
+                r.valuers_exceptions_list = '{\"include\": [23755], \"exclude\": []}' and
+                re.id is null;
         ");
 
         $pendencias_ronaldo = $conn->fetchAll("
@@ -402,7 +457,7 @@ return array(
             WHERE
                 r.opportunity_id = 1275 and
                 r.valuers_exceptions_list = '{\"include\": [25089], \"exclude\": []}' and
-                (re.id is null or re.status = 0);
+                re.id is null;
         ");
 
         $pendencias_andre = $conn->fetchAll("
@@ -421,7 +476,7 @@ return array(
             WHERE
                 r.opportunity_id = 1275 and
                 r.valuers_exceptions_list = '{\"include\": [], \"exclude\": []}' and
-                (re.id is null or re.status = 0);
+                re.id is null;
         ");
 
         foreach($pendencias_adriana as $i) {
@@ -460,7 +515,7 @@ return array(
                 registration_evaluation re ON r.id = re.registration_id
             WHERE
                 r.opportunity_id = 1275 and
-                re.status = 1 and
+                re.status in (0,1) and
                 re.user_id = 29120;
         ");
 
@@ -473,7 +528,7 @@ return array(
                 registration_evaluation re ON r.id = re.registration_id
             WHERE
                 r.opportunity_id = 1275 and
-                re.status = 1 and
+                re.status in (0,1) and
                 re.user_id = 25089;
         ");
 
@@ -486,7 +541,7 @@ return array(
                 registration_evaluation re ON r.id = re.registration_id
             WHERE
                 r.opportunity_id = 1275 and
-                re.status = 1 and
+                re.status in (0,1) and
                 re.user_id = 23755;
         ");
 
@@ -554,16 +609,6 @@ return array(
                     id IN ($insc_id);
         ";
 
-        // Remover as avaliações com status 0
-        $insc_id = implode(',', $pendentes);
-        $delete_registration_evaluation = "
-            DELETE FROM registration_evaluation
-            WHERE
-                registration_id IN ($insc_id)
-                AND status = 0
-                AND user_id IN (29120, 25089, 23755);
-        ";
-
         try {
             $conn->beginTransaction();
 
@@ -587,60 +632,6 @@ return array(
             $app->log->debug($e->getMessage());
         }
 
-    },
-
-    'Remove duplicated evaluations' => function () use($conn, $app) {
-        $inscricoes = $conn->fetchAll("
-            SELECT re.registration_id
-			FROM registration_evaluation re
-			JOIN registration r ON r.id = re.registration_id AND r.opportunity_id = 1275
-			GROUP BY registration_id
-			HAVING count(re.id) > 1
-			ORDER BY registration_id;
-        ");
-
-        $inscricoes = array_column($inscricoes, 'registration_id');
-
-        foreach($inscricoes as $i){
-            $avaliacoes = $conn->fetchAll("
-                SELECT id,user_id
-                FROM registration_evaluation re
-                WHERE re.registration_id = $i and re.user_id != 25089
-                ORDER BY re.id;
-            ");
-
-            $apagar_avaliacao[] = "
-                DELETE
-                FROM registration_evaluation re
-                WHERE re.id = {$avaliacoes[0]['id']};
-            ";
-
-            $apagar_pcache[] = "
-                DELETE FROM pcache
-                WHERE
-                    object_id = $i
-                    AND object_type = 'MapasCulturais\Entities\Registration'
-                    AND user_id = {$avaliacoes[0]['user_id']}
-                    AND action IN ('evaluate', 'view', 'viewPrivateData', 'viewPrivateFiles', 'viewUserEvaluation');
-            ";
-        }
-
-        try {
-            $conn->beginTransaction();
-
-            foreach($apagar_avaliacao as $q) {
-                $conn->executeQuery($q);
-            }
-
-            foreach($apagar_pcache as $q) {
-                $conn->executeQuery($q);
-            }
-
-            $conn->commit();
-        } catch (Exception $e) {
-            $conn->rollback();
-            $app->log->debug($e->getMessage());
-        }
     },
 
     'Fix permission cache for opportunity 1275' => function() use($conn, $app) {
@@ -690,7 +681,7 @@ return array(
                 SELECT r.id
                 FROM registration r
                 LEFT JOIN registration_evaluation re ON re.registration_id = r.id
-                WHERE re.id is null AND
+                WHERE (re.id is null OR re.user_id = 25061) AND
                     r.opportunity_id = 1275 AND
                     r.status = 1
                 ORDER BY r.id
@@ -740,6 +731,24 @@ return array(
             );
         ";
 
+        $categories = $conn->fetchAll("
+            SELECT *
+            FROM evaluationmethodconfiguration_meta
+            WHERE object_id=1008 and key='fetchCategories'
+        ");
+
+        $evaluator_categories = json_decode($categories[0]['value'], true);
+
+        $evaluator_categories[25061] = '';
+
+        $evaluator_categories = json_encode($evaluator_categories);
+
+        $update_categories = "
+            UPDATE evaluationmethodconfiguration_meta
+            SET value = '$evaluator_categories'
+            WHERE id = {$categories[0]['id']}
+        ";
+
         try {
             $conn->beginTransaction();
 
@@ -754,6 +763,7 @@ return array(
             }
 
             $conn->executeQuery($update_agentrelation);
+            $conn->executeQuery($update_categories);
 
             $conn->commit();
         } catch (Exception $e) {
@@ -761,6 +771,42 @@ return array(
             $app->log->debug($e->getMessage());
         }
 
+    },
+
+    'Fix valuers exceptions list' => function () use ($conn, $app) {
+        $registration = $conn->fetchAll("
+            SELECT r.id, r.valuers_exceptions_list, re.user_id
+            FROM registration r
+            JOIN registration_evaluation re ON re.registration_id = r.id
+            WHERE r.opportunity_id = 1275
+        ");
+
+        // Conferir se a exception list e a avaliação tem o mesmo ID
+        foreach ($registration as $r) {
+            $exceptions_list = json_decode($r['valuers_exceptions_list']);
+            $evaluator = $r['user_id'];
+
+            if (isset($exceptions_list->include[0]) && $exceptions_list->include[0] !== $evaluator) {
+                $update_registrations[] = "
+                    UPDATE registration
+                    SET valuers_exceptions_list = '{\"include\": [{$evaluator}], \"exclude\": []}'
+                    WHERE id = {$r['id']}
+                ";
+            }
+        }
+
+        try {
+            $conn->beginTransaction();
+
+            foreach ($update_registrations as $q) {
+                $conn->executeQuery($q);
+            }
+
+            $conn->commit();
+        } catch (Exception $e) {
+            $conn->rollback();
+            $app->log->debug($e->getMessage());
+        }
     }
 
 );
