@@ -740,6 +740,7 @@ return array(
         $evaluator_categories = json_decode($categories[0]['value'], true);
 
         $evaluator_categories[25061] = '';
+        $evaluator_categories[29147] = '47;46';
 
         $evaluator_categories = json_encode($evaluator_categories);
 
