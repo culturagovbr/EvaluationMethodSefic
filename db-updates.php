@@ -389,8 +389,6 @@ return array(
                 re.id is null;
         ");
 
-        // $inscricoes = array_merge($pendencias_incorretas_a, $pendencias_incorretas_r);
-
         foreach($incorretas_andre as $i) {
             $insc_andre[] = $i['id'];
         }
@@ -419,89 +417,6 @@ return array(
                 object_id IN ($insc_id)
                 AND object_type = 'MapasCulturais\Entities\Registration'
                 AND user_id = 25089
-                AND action IN ('evaluate', 'view', 'viewPrivateData', 'viewPrivateFiles', 'viewUserEvaluation');
-        ";
-
-        $pendencias_adriana = $conn->fetchAll( "
-            SELECT
-                distinct r.id, r.number
-            FROM
-                registration r
-            LEFT JOIN
-                registration_evaluation re ON re.registration_id = r.id and
-                re.user_id = 23755
-            JOIN
-                pcache p ON r.id = p.object_id and
-                p.object_type = 'MapasCulturais\Entities\Registration' and
-                p.user_id = 23755 and
-                p.action = 'evaluate'
-            WHERE
-                r.opportunity_id = 1275 and
-                r.valuers_exceptions_list = '{\"include\": [23755], \"exclude\": []}' and
-                re.id is null;
-        ");
-
-        $pendencias_ronaldo = $conn->fetchAll("
-            SELECT
-                distinct r.id, r.number
-            FROM
-                registration r
-            LEFT JOIN
-                registration_evaluation re ON re.registration_id = r.id and
-                re.user_id = 25089
-            JOIN
-                pcache p ON r.id = p.object_id and
-                p.object_type = 'MapasCulturais\Entities\Registration' and
-                p.user_id = 25089 and
-                p.action = 'evaluate'
-            WHERE
-                r.opportunity_id = 1275 and
-                r.valuers_exceptions_list = '{\"include\": [25089], \"exclude\": []}' and
-                re.id is null;
-        ");
-
-        $pendencias_andre = $conn->fetchAll("
-            SELECT
-                distinct r.id, r.number
-            FROM
-                registration r
-            LEFT JOIN
-                registration_evaluation re ON re.registration_id = r.id and
-                re.user_id = 29120
-            JOIN
-                pcache p ON r.id = p.object_id and
-                p.object_type = 'MapasCulturais\Entities\Registration' and
-                p.user_id = 29120 and
-                p.action = 'evaluate'
-            WHERE
-                r.opportunity_id = 1275 and
-                r.valuers_exceptions_list = '{\"include\": [], \"exclude\": []}' and
-                re.id is null;
-        ");
-
-        foreach($pendencias_adriana as $i) {
-            $pendentes[] = $i['id'];
-            $pendentes_primeira_fase[] = explode('on-', $i['number'])[1];
-        }
-
-        foreach($pendencias_ronaldo as $i) {
-            $pendentes[] = $i['id'];
-            $pendentes_primeira_fase[] = explode('on-', $i['number'])[1];
-        }
-
-        foreach($pendencias_andre as $i) {
-            $pendentes[] = $i['id'];
-            $pendentes_primeira_fase[] = explode('on-', $i['number'])[1];
-        }
-
-        $insc_id = implode(',', array_merge($pendentes, $pendentes_primeira_fase));
-
-        $delete_pcache_pendentes = "
-            DELETE FROM pcache
-            WHERE
-                object_id IN ($insc_id)
-                AND object_type = 'MapasCulturais\Entities\Registration'
-                AND user_id IN (23755, 25089, 29120)
                 AND action IN ('evaluate', 'view', 'viewPrivateData', 'viewPrivateFiles', 'viewUserEvaluation');
         ";
 
@@ -584,31 +499,6 @@ return array(
             ";
         }
 
-        // Incluir Rafaela (agent 50986 usr 25061) nessas avaliações pendentes
-        // Inserir na pcache e no valuers_exception_list das inscrições
-        $pendentes_totais = array_merge($pendentes, $pendentes_primeira_fase);
-        foreach($pendentes_totais as $p){
-            $insert_pcache[] = "
-                INSERT INTO pcache (user_id, action, create_timestamp, object_type, object_id)
-                        VALUES
-                            (25061, 'evaluate', now(), 'MapasCulturais\Entities\Registration', $p),
-                            (25061, 'view', now(), 'MapasCulturais\Entities\Registration', $p),
-                            (25061, 'viewPrivateData', now(), 'MapasCulturais\Entities\Registration', $p),
-                            (25061, 'viewPrivateFiles', now(), 'MapasCulturais\Entities\Registration', $p),
-                            (25061, 'viewUserEvaluation', now(), 'MapasCulturais\Entities\Registration', $p)
-            ";
-        }
-
-        $insc_id = implode(',', array_merge($pendentes, $pendentes_primeira_fase));
-
-        $update_registrations[] = "
-            UPDATE registration
-                SET
-                    valuers_exceptions_list = '{\"include\": [25061], \"exclude\": []}'
-                WHERE
-                    id IN ($insc_id);
-        ";
-
         try {
             $conn->beginTransaction();
 
@@ -616,13 +506,8 @@ return array(
 
             $conn->executeQuery($delete_pcache_andre);
             $conn->executeQuery($delete_pcache_ronaldo);
-            $conn->executeQuery($delete_pcache_pendentes);
 
             foreach($update_registrations as $q) {
-                $conn->executeQuery($q);
-            }
-
-            foreach($insert_pcache as $q) {
                 $conn->executeQuery($q);
             }
 
